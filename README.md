@@ -16,18 +16,61 @@
 ## โครงสร้างโปรเจกต์
 
 ```
-smart-scheduler-project/
-├── frontend/                 # Next.js 16 (App Router) + React 19
-│   ├── app/
-│   │   ├── lib/              # supabase, api, types
-│   │   ├── components/
-│   │   ├── context/
-│   │   └── hooks/
+smart-scheduler/
+├── backend/                          # Express 5 + Bun
+│   ├── src/
+│   │   ├── config/env.ts             # Environment validation
+│   │   ├── db/supabase.ts            # Supabase client
+│   │   ├── middleware/
+│   │   │   ├── auth.ts               # JWT auth middleware
+│   │   │   └── cors.ts               # CORS configuration
+│   │   ├── types/index.ts            # TypeScript interfaces
+│   │   ├── utils/time.ts             # Time helper functions
+│   │   ├── services/
+│   │   │   ├── ai.service.ts         # Groq AI logic
+│   │   │   ├── schedule.service.ts   # Smart scheduling algorithm
+│   │   │   └── tasks.service.ts      # Task DB operations
+│   │   ├── controllers/
+│   │   │   ├── ai.controller.ts
+│   │   │   ├── schedule.controller.ts
+│   │   │   └── tasks.controller.ts
+│   │   ├── routes/
+│   │   │   ├── ai.routes.ts
+│   │   │   ├── schedule.routes.ts
+│   │   │   ├── tasks.routes.ts
+│   │   │   └── index.ts
+│   │   └── app.ts                    # Express app setup
+│   ├── index.ts                      # Entry point
 │   └── .env.example
-├── smart-scheduler-backend/  # Express 5 + Bun
-│   ├── index.ts              # API routes
+│
+├── frontend/                         # Next.js 16 (App Router) + React 19
+│   ├── app/                          # Pages only
+│   │   ├── (auth)/login/
+│   │   ├── (auth)/register/
+│   │   ├── dashboard/
+│   │   ├── tasks/
+│   │   ├── schedule/
+│   │   └── profile/
+│   ├── components/                   # Shared React components
+│   ├── hooks/                        # Custom React hooks
+│   ├── context/                      # React Context providers
+│   ├── lib/
+│   │   ├── api/                      # API layer (by domain)
+│   │   │   ├── http.ts               # Fetch helper
+│   │   │   ├── tasks.ts
+│   │   │   ├── ai.ts
+│   │   │   ├── schedule.ts
+│   │   │   ├── profile.ts
+│   │   │   └── index.ts
+│   │   ├── supabase.ts
+│   │   └── types.ts
 │   └── .env.example
-└── README.md
+│
+├── supabase/
+│   ├── migrations/
+│   └── schema.sql
+└── scripts/
+    └── test-supabase.ts
 ```
 
 ## สิ่งที่ต้องมี
@@ -41,32 +84,33 @@ smart-scheduler-project/
 ### 1. Clone และติดตั้ง dependencies
 
 ```bash
-cd frontend
-bun install
+# ติดตั้งทั้งหมดพร้อมกัน (root scripts)
+bun run install:all
 
-cd ../smart-scheduler-backend
-bun install
+# หรือติดตั้งแยก
+cd backend && bun install
+cd ../frontend && bun install
 ```
 
 ### 2. ตั้งค่า environment
 
-**Frontend** — copy แล้วแก้ค่า:
+**Backend:**
+```bash
+cd backend
+cp .env.example .env
+# แก้ไขค่าใน .env
+```
 
+**Frontend:**
 ```bash
 cd frontend
 cp .env.example .env.local
-```
-
-**Backend** — copy แล้วแก้ค่า:
-
-```bash
-cd smart-scheduler-backend
-cp .env.example .env
+# แก้ไขค่าใน .env.local
 ```
 
 | ตัวแปร | ที่ใช้ | คำอธิบาย |
 |--------|--------|----------|
-| `NEXT_PUBLIC_SUPABASE_URL` | frontend | URL โปรเจกต Supabase |
+| `NEXT_PUBLIC_SUPABASE_URL` | frontend | URL โปรเจกต์ Supabase |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | frontend | anon/public key |
 | `NEXT_PUBLIC_API_URL` | frontend | URL backend (default: `http://localhost:5000`) |
 | `SUPABASE_URL` | backend | URL เดียวกับ frontend |
@@ -78,9 +122,9 @@ cp .env.example .env
 
 ### 3. Supabase — schema + RLS
 
-**โปรเจกตใหม่:** รัน `supabase/schema.sql` ใน [SQL Editor](https://supabase.com/dashboard/project/_/sql)
+**โปรเจกต์ใหม่:** รัน `supabase/schema.sql` ใน [SQL Editor](https://supabase.com/dashboard/project/_/sql)
 
-**โปรเจกตที่มีตารางแล้ว:** รัน `supabase/migrations/202605300001_enable_rls.sql` (เปิด RLS + policies + trigger สร้าง `public.users` ตอน signup)
+**โปรเจกต์ที่มีตารางแล้ว:** รัน `supabase/migrations/202605300001_enable_rls.sql`
 
 | ตาราง | คำอธิบาย |
 |--------|----------|
@@ -88,26 +132,11 @@ cp .env.example .env
 | `tasks` | งานของผู้ใช้ |
 | `schedules` | ช่วงเวลาในตาราง (`Task` / `Mandatory_Break`) |
 
-หลังเปิด RLS ให้ backend ใช้ **`SUPABASE_SERVICE_ROLE_KEY`** (ดู `smart-scheduler-backend/.env.example`) — อย่าใส่ key นี้ใน frontend
-
-**ทดสอบอัตโนมัติ** (ต้องมีบัญชีทดสอบในแอป):
-
-```bash
-# เพิ่มใน frontend/.env.local
-# SUPABASE_TEST_EMAIL=you@example.com
-# SUPABASE_TEST_PASSWORD=your-password
-
-cd frontend
-bun run ../scripts/test-supabase.ts
-```
-
 ### 4. รัน development
-
-เปิด **สอง terminal**:
 
 ```bash
 # Terminal 1 — Backend (port 5000)
-cd smart-scheduler-backend
+cd backend
 bun run dev
 
 # Terminal 2 — Frontend (port 3000)
@@ -119,7 +148,7 @@ bun dev
 
 ## API (Backend)
 
-Base URL: `NEXT_PUBLIC_API_URL` หรือ `http://localhost:5000`
+Base URL: `http://localhost:5000`
 
 | Method | Path | คำอธิบาย |
 |--------|------|----------|
@@ -131,21 +160,30 @@ Base URL: `NEXT_PUBLIC_API_URL` หรือ `http://localhost:5000`
 | `DELETE` | `/api/tasks/:id` | ลบงาน |
 | `POST` | `/api/tasks/spawn-recurring` | สร้างงานซ้ำตาม recurrence สำหรับวันที่กำหนด |
 
-## Scripts
+## Architecture
 
-### Frontend
+### Backend (Layered Architecture)
 
-```bash
-bun dev      # development server
-bun run build
-bun run start
-bun run lint
+```
+Request → Middleware (CORS, Auth) → Route → Controller → Service → Database
 ```
 
-### Backend
+- **Config** — validate & centralize env vars
+- **Middleware** — cross-cutting concerns (auth, cors)
+- **Routes** — HTTP method + path definitions only
+- **Controllers** — parse req/res, delegate to service, handle errors
+- **Services** — business logic + DB operations (pure functions, no Express types)
+- **Utils** — stateless helper functions
 
-```bash
-bun run dev  # watch mode
+### Frontend (Feature-based)
+
+```
+app/          ← Next.js pages (routing only)
+components/   ← Reusable React components
+hooks/        ← Custom hooks (encapsulate state + API calls)
+context/      ← Global state (Auth)
+lib/api/      ← HTTP client + domain-specific API functions
+lib/          ← Types, Supabase client
 ```
 
 ## Deploy หมายเหตุ

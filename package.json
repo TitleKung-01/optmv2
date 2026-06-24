@@ -1,0 +1,11 @@
+{
+  "name": "smart-scheduler",
+  "private": true,
+  "scripts": {
+    "dev:backend": "cd backend && bun run dev",
+    "dev:frontend": "cd frontend && bun dev",
+    "install:backend": "cd backend && bun install",
+    "install:frontend": "cd frontend && bun install",
+    "install:all": "bun run install:backend && bun run install:frontend"
+  }
+}
