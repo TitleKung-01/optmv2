@@ -1,8 +1,8 @@
-export type Difficulty = 'Low' | 'Medium' | 'High';
-export type TaskStatus = 'Pending' | 'Scheduled' | 'Completed';
-export type Recurrence = 'none' | 'daily' | 'weekly' | 'custom';
-export type Chronotype = 'Morning Lark' | 'Third Bird' | 'Night Owl';
-export type EventType = 'Task' | 'Mandatory_Break' | 'Fixed';
+export type Difficulty = "Low" | "Medium" | "High";
+export type TaskStatus = "Pending" | "Scheduled" | "Completed";
+export type Recurrence = "none" | "daily" | "weekly" | "custom";
+export type Chronotype = "Morning Lark" | "Third Bird" | "Night Owl";
+export type EventType = "Task" | "Mandatory_Break" | "Fixed";
 
 export interface Task {
   id: string;
@@ -39,6 +39,7 @@ export interface UserProfile {
   peak_time_end: string | null;
   dip_time_start: string | null;
   dip_time_end: string | null;
+  line_user_id: string | null;
   created_at: string;
 }
 
@@ -48,7 +49,7 @@ export interface AISubtask {
   difficulty: Difficulty;
 }
 
-export type EnergyLevel = 'peak' | 'normal' | 'dip';
+export type EnergyLevel = "peak" | "normal" | "dip";
 
 export interface EnergyState {
   level: EnergyLevel;

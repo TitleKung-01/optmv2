@@ -1,27 +1,54 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import type { Task, AISubtask, Difficulty, Recurrence } from '@/lib/types';
+import { useState } from "react";
+import type { Task, AISubtask, Difficulty, Recurrence } from "@/lib/types";
+import {
+  X,
+  Sparkles,
+  AlertTriangle,
+  Calendar,
+  Folder,
+  RefreshCw,
+  Star,
+} from "lucide-react";
 
 interface Props {
   initial?: Partial<Task>;
-  onSave: (data: Omit<Task, 'id' | 'user_id' | 'created_at' | 'status'>) => Promise<void>;
+  onSave: (
+    data: Omit<Task, "id" | "user_id" | "created_at" | "status">,
+  ) => Promise<void>;
   onClose: () => void;
   onBreakdown?: (title: string) => Promise<AISubtask[]>;
-  onAddSubtask?: (subtask: Omit<Task, 'id' | 'user_id' | 'created_at' | 'status'>) => Promise<void>;
+  onAddSubtask?: (
+    subtask: Omit<Task, "id" | "user_id" | "created_at" | "status">,
+  ) => Promise<void>;
 }
 
-const DAYS = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
+const DAYS = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
 
-export default function TaskForm({ initial, onSave, onClose, onBreakdown, onAddSubtask }: Props) {
-  const [title, setTitle] = useState(initial?.title ?? '');
-  const [difficulty, setDifficulty] = useState<Difficulty>(initial?.difficulty ?? 'Medium');
+export default function TaskForm({
+  initial,
+  onSave,
+  onClose,
+  onBreakdown,
+  onAddSubtask,
+}: Props) {
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [difficulty, setDifficulty] = useState<Difficulty>(
+    initial?.difficulty ?? "Medium",
+  );
   const [duration, setDuration] = useState(initial?.estimated_duration ?? 30);
   const [priority, setPriority] = useState(initial?.priority ?? 3);
-  const [deadline, setDeadline] = useState(initial?.deadline ? initial.deadline.slice(0, 16) : '');
-  const [category, setCategory] = useState(initial?.category ?? '');
-  const [recurrence, setRecurrence] = useState<Recurrence>(initial?.recurrence ?? 'none');
-  const [recurrenceDays, setRecurrenceDays] = useState<number[]>(initial?.recurrence_days ?? []);
+  const [deadline, setDeadline] = useState(
+    initial?.deadline ? initial.deadline.slice(0, 16) : "",
+  );
+  const [category, setCategory] = useState(initial?.category ?? "");
+  const [recurrence, setRecurrence] = useState<Recurrence>(
+    initial?.recurrence ?? "none",
+  );
+  const [recurrenceDays, setRecurrenceDays] = useState<number[]>(
+    initial?.recurrence_days ?? [],
+  );
 
   const [saving, setSaving] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -39,7 +66,7 @@ export default function TaskForm({ initial, onSave, onClose, onBreakdown, onAddS
       deadline: deadline ? new Date(deadline).toISOString() : null,
       category: category.trim() || null,
       recurrence,
-      recurrence_days: recurrence === 'custom' ? recurrenceDays : null,
+      recurrence_days: recurrence === "custom" ? recurrenceDays : null,
     });
     setSaving(false);
     onClose();
@@ -64,7 +91,7 @@ export default function TaskForm({ initial, onSave, onClose, onBreakdown, onAddS
         priority,
         deadline: null,
         category: category.trim() || null,
-        recurrence: 'none',
+        recurrence: "none",
         recurrence_days: null,
       });
     }
@@ -74,44 +101,60 @@ export default function TaskForm({ initial, onSave, onClose, onBreakdown, onAddS
   };
 
   const toggleDay = (d: number) => {
-    setRecurrenceDays(prev =>
-      prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d]
+    setRecurrenceDays((prev) =>
+      prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d],
     );
   };
 
   const isEdit = !!initial?.id;
 
   return (
-    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="modal">
-        <div className="modal-header">
-          <h2 style={{ fontSize: 18, fontWeight: 700 }}>
-            {isEdit ? 'แก้ไขงาน' : '✦ เพิ่มงานใหม่'}
+    <div
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="w-full max-w-[540px] max-h-[90vh] overflow-y-auto bg-zinc-950 border border-zinc-800 rounded-lg shadow-2xl flex flex-col sh-fade-up">
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-zinc-800">
+          <h2 className="text-base font-semibold tracking-tight text-zinc-100 flex items-center gap-2">
+            {!isEdit && <Sparkles className="w-4 h-4 text-indigo-400" />}
+            {isEdit ? "แก้ไขรายละเอียดงาน" : "สร้างงานชิ้นใหม่"}
           </h2>
-          <button className="btn-icon" onClick={onClose} style={{ fontSize: 18 }}>✕</button>
+          <button
+            className="sh-btn sh-btn-ghost p-1.5 text-zinc-500 hover:text-zinc-300"
+            onClick={onClose}
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
-        <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        {/* Body */}
+        <div className="p-5 flex flex-col gap-5 overflow-y-auto">
           {/* Title */}
-          <div>
-            <label className="input-label">ชื่องาน *</label>
-            <div style={{ display: 'flex', gap: 8 }}>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-zinc-400 tracking-wider uppercase">
+              ชื่องาน *
+            </label>
+            <div className="flex gap-2">
               <input
-                className="input"
+                className="sh-input"
                 value={title}
-                onChange={e => setTitle(e.target.value)}
-                placeholder="เช่น เขียนรายงาน, อ่านหนังสือ..."
-                onKeyDown={e => e.key === 'Enter' && handleSave()}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="เช่น ร่างเนื้อหารายงาน, วิ่งจ็อกกิ้ง..."
+                onKeyDown={(e) => e.key === "Enter" && handleSave()}
               />
               {onBreakdown && (
                 <button
-                  className="btn btn-ghost"
+                  className="sh-btn sh-btn-secondary px-3 py-2 text-xs flex-shrink-0 flex items-center gap-1.5 border border-zinc-800 bg-zinc-900"
                   onClick={handleBreakdown}
                   disabled={!title.trim() || aiLoading}
-                  title="ให้ AI แตกงานย่อย"
-                  style={{ flexShrink: 0, padding: '0 14px', fontSize: 13 }}
                 >
-                  {aiLoading ? <span className="spinner" /> : '🤖 AI'}
+                  {aiLoading ? (
+                    <div className="w-3.5 h-3.5 border-2 border-zinc-600 border-t-zinc-200 rounded-full animate-spin" />
+                  ) : (
+                    <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                  )}
+                  AI Breakdown
                 </button>
               )}
             </div>
@@ -119,135 +162,193 @@ export default function TaskForm({ initial, onSave, onClose, onBreakdown, onAddS
 
           {/* AI Subtasks result */}
           {subtasks.length > 0 && (
-            <div style={{
-              background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)',
-              borderRadius: 'var(--radius-md)', padding: 16,
-            }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--indigo-light)', marginBottom: 12 }}>
-                🤖 AI แนะนำ {subtasks.length} งานย่อย
+            <div className="border border-indigo-500/20 bg-indigo-950/10 rounded-md p-4">
+              <div className="text-xs font-semibold text-indigo-400 mb-3 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" />
+                AI วิเคราะห์แตกเป็น {subtasks.length} งานย่อยที่ทำได้จริง:
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
+              <div className="flex flex-col gap-2.5 mb-4">
                 {subtasks.map((s, i) => (
-                  <div key={i} style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    gap: 8, fontSize: 13, padding: '6px 0',
-                    borderBottom: i < subtasks.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-                  }}>
-                    <span style={{ color: 'var(--text-primary)' }}>{s.title}</span>
-                    <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                      <span className={`badge badge-${s.difficulty.toLowerCase()}`}>{s.difficulty}</span>
-                      <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{s.duration} นาที</span>
+                  <div
+                    key={i}
+                    className="flex items-center justify-between gap-4 text-xs py-1 border-b border-zinc-800/40 last:border-0"
+                  >
+                    <span className="text-zinc-300 font-medium">{s.title}</span>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span
+                        className={`sh-badge text-[10px] ${s.difficulty === "High" ? "sh-badge-destructive" : s.difficulty === "Medium" ? "sh-badge-secondary" : "sh-badge-outline"}`}
+                      >
+                        {s.difficulty === "High"
+                          ? "ยาก"
+                          : s.difficulty === "Medium"
+                            ? "ปานกลาง"
+                            : "ง่าย"}
+                      </span>
+                      <span className="text-zinc-500 font-semibold">
+                        {s.duration} น.
+                      </span>
                     </div>
                   </div>
                 ))}
               </div>
               <button
-                className="btn btn-primary"
+                className="sh-btn sh-btn-default w-full py-2.5 text-xs font-semibold shadow-md bg-indigo-600 text-white hover:bg-indigo-500"
                 onClick={handleAddAllSubtasks}
                 disabled={addingSubtasks}
-                style={{ width: '100%', fontSize: 13 }}
               >
-                {addingSubtasks ? <><span className="spinner" /> กำลังเพิ่ม...</> : `✓ เพิ่มทั้งหมด ${subtasks.length} งาน`}
+                {addingSubtasks
+                  ? "กำลังนำเข้าแบบกลุ่ม..."
+                  : `✓ เพิ่ม subtasks ทั้งหมด (${subtasks.length} งาน)`}
               </button>
             </div>
           )}
 
           {/* Difficulty + Duration */}
-          <div className="grid-2">
-            <div>
-              <label className="input-label">ระดับความยาก</label>
-              <select className="input" value={difficulty} onChange={e => setDifficulty(e.target.value as Difficulty)}>
-                <option value="Low">ง่าย (Low)</option>
-                <option value="Medium">ปานกลาง (Medium)</option>
-                <option value="High">ยาก (High)</option>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-zinc-400 tracking-wider uppercase">
+                ระดับความยาก
+              </label>
+              <select
+                className="sh-input bg-zinc-950"
+                value={difficulty}
+                onChange={(e) => setDifficulty(e.target.value as Difficulty)}
+              >
+                <option value="Low">Low (ง่าย - ใช้พลังงานต่ำ)</option>
+                <option value="Medium">Medium (ปานกลาง)</option>
+                <option value="High">High (ยาก - ใช้สมาธิสูง)</option>
               </select>
             </div>
-            <div>
-              <label className="input-label">เวลาโดยประมาณ (นาที)</label>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-zinc-400 tracking-wider uppercase">
+                เวลาโดยประมาณ (นาที)
+              </label>
               <input
-                type="number" className="input"
-                value={duration} min={5} max={480} step={5}
-                onChange={e => setDuration(Number(e.target.value))}
+                type="number"
+                className="sh-input"
+                value={duration}
+                min={5}
+                max={480}
+                step={5}
+                onChange={(e) => setDuration(Number(e.target.value))}
               />
             </div>
           </div>
 
           {/* Priority */}
-          <div>
-            <label className="input-label">ความสำคัญ (1 ต่ำ – 5 สูง)</label>
-            <div style={{ display: 'flex', gap: 8, marginTop: 2 }}>
-              {[1, 2, 3, 4, 5].map(p => (
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-zinc-400 tracking-wider uppercase">
+              ความสำคัญ (Priority)
+            </label>
+            <div className="flex gap-2">
+              {[1, 2, 3, 4, 5].map((p) => (
                 <button
                   key={p}
                   onClick={() => setPriority(p)}
-                  style={{
-                    width: 40, height: 40, borderRadius: 8,
-                    border: `1px solid ${priority >= p ? 'var(--warning)' : 'var(--border)'}`,
-                    background: priority >= p ? 'rgba(245,158,11,0.12)' : 'transparent',
-                    cursor: 'pointer', fontSize: 16,
-                    color: priority >= p ? 'var(--warning)' : 'var(--text-muted)',
-                    transition: 'all 0.15s ease',
-                  }}
-                >★</button>
+                  className={`w-9 h-9 rounded-md border flex items-center justify-center cursor-pointer transition-all ${
+                    priority >= p
+                      ? "border-amber-500/30 bg-amber-500/10 text-amber-500"
+                      : "border-zinc-800 bg-transparent text-zinc-600 hover:border-zinc-700"
+                  }`}
+                >
+                  <Star className="w-4 h-4 fill-current" />
+                </button>
               ))}
             </div>
           </div>
 
           {/* Deadline + Category */}
-          <div className="grid-2">
-            <div>
-              <label className="input-label">Deadline</label>
-              <input type="datetime-local" className="input" value={deadline} onChange={e => setDeadline(e.target.value)} />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-zinc-400 tracking-wider uppercase flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-zinc-500" />
+                Deadline
+              </label>
+              <input
+                type="datetime-local"
+                className="sh-input text-zinc-300"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+              />
             </div>
-            <div>
-              <label className="input-label">หมวดหมู่</label>
-              <input className="input" value={category} onChange={e => setCategory(e.target.value)} placeholder="เช่น งาน, เรียน, ส่วนตัว" />
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-zinc-400 tracking-wider uppercase flex items-center gap-1">
+                <Folder className="w-3.5 h-3.5 text-zinc-500" />
+                หมวดหมู่
+              </label>
+              <input
+                className="sh-input"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                placeholder="เช่น งานเขียน, สุขภาพ"
+              />
             </div>
           </div>
 
           {/* Recurrence */}
-          <div>
-            <label className="input-label">งานซ้ำ</label>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {(['none', 'daily', 'weekly', 'custom'] as Recurrence[]).map(r => (
-                <button
-                  key={r}
-                  onClick={() => setRecurrence(r)}
-                  className={recurrence === r ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm'}
-                >
-                  {r === 'none' ? 'ไม่ซ้ำ' : r === 'daily' ? 'ทุกวัน' : r === 'weekly' ? 'ทุกสัปดาห์' : 'กำหนดเอง'}
-                </button>
-              ))}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-zinc-400 tracking-wider uppercase flex items-center gap-1">
+              <RefreshCw className="w-3.5 h-3.5 text-zinc-500" />
+              การจัดตารางงานซ้ำ
+            </label>
+            <div className="flex gap-2 flex-wrap">
+              {(["none", "daily", "weekly", "custom"] as Recurrence[]).map(
+                (r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setRecurrence(r)}
+                    className={`sh-btn px-3 py-1.5 text-xs font-semibold transition-all ${
+                      recurrence === r ? "sh-btn-default" : "sh-btn-outline"
+                    }`}
+                  >
+                    {r === "none"
+                      ? "ไม่ซ้ำ"
+                      : r === "daily"
+                        ? "ทุกวัน"
+                        : r === "weekly"
+                          ? "ทุกสัปดาห์"
+                          : "กำหนดวันเอง"}
+                  </button>
+                ),
+              )}
             </div>
-            {recurrence === 'custom' && (
-              <div style={{ display: 'flex', gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
+            {recurrence === "custom" && (
+              <div className="flex gap-1.5 mt-2 flex-wrap">
                 {DAYS.map((d, i) => (
                   <button
                     key={i}
+                    type="button"
                     onClick={() => toggleDay(i)}
-                    style={{
-                      width: 36, height: 36, borderRadius: 8,
-                      border: `1px solid ${recurrenceDays.includes(i) ? 'var(--indigo)' : 'var(--border)'}`,
-                      background: recurrenceDays.includes(i) ? 'rgba(99,102,241,0.2)' : 'transparent',
-                      cursor: 'pointer', fontSize: 12, fontWeight: 600,
-                      color: recurrenceDays.includes(i) ? 'var(--indigo-light)' : 'var(--text-muted)',
-                      transition: 'all 0.15s ease',
-                    }}
-                  >{d}</button>
+                    className={`w-8 h-8 rounded-md border text-xs font-semibold cursor-pointer transition-all ${
+                      recurrenceDays.includes(i)
+                        ? "border-indigo-500 bg-indigo-500/10 text-indigo-400"
+                        : "border-zinc-800 bg-transparent text-zinc-500 hover:border-zinc-700"
+                    }`}
+                  >
+                    {d}
+                  </button>
                 ))}
               </div>
             )}
           </div>
         </div>
 
-        <div className="modal-footer">
-          <button className="btn btn-ghost" onClick={onClose}>ยกเลิก</button>
+        {/* Footer */}
+        <div className="flex gap-3 justify-end p-5 border-t border-zinc-800 bg-zinc-950">
+          <button className="sh-btn sh-btn-outline px-4 py-2" onClick={onClose}>
+            ยกเลิก
+          </button>
           <button
-            className="btn btn-primary"
+            className="sh-btn sh-btn-default px-5 py-2 font-semibold"
             onClick={handleSave}
             disabled={!title.trim() || saving}
           >
-            {saving ? <><span className="spinner" /> กำลังบันทึก...</> : isEdit ? '✓ บันทึกการแก้ไข' : '✦ เพิ่มงาน'}
+            {saving
+              ? "กำลังบันทึก..."
+              : isEdit
+                ? "บันทึกการแก้ไข"
+                : "ยืนยันสร้างงาน"}
           </button>
         </div>
       </div>

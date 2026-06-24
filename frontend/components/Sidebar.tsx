@@ -1,19 +1,29 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import { useEnergy } from '@/hooks/useEnergy';
-import { useProfile } from '@/hooks/useProfile';
-import { useEffect } from 'react';
-import EnergyGauge from './EnergyGauge';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { useEnergy } from "@/hooks/useEnergy";
+import { useProfile } from "@/hooks/useProfile";
+import EnergyGauge from "./EnergyGauge";
+import {
+  LayoutDashboard,
+  CheckSquare,
+  Calendar,
+  User,
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+  Zap,
+} from "lucide-react";
 
-const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: '◈' },
-  { href: '/tasks', label: 'Tasks', icon: '✦' },
-  { href: '/schedule', label: 'Schedule', icon: '◷' },
-  { href: '/profile', label: 'Profile', icon: '◉' },
+/* ── Nav config ───────────────────────────────────────────────────────────── */
+const NAV = [
+  { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
+  { href: "/tasks", label: "Tasks", Icon: CheckSquare },
+  { href: "/schedule", label: "Schedule", Icon: Calendar },
+  { href: "/profile", label: "Profile", Icon: User },
 ];
 
 export default function Sidebar() {
@@ -23,127 +33,117 @@ export default function Sidebar() {
   const { profile, fetchProfile } = useProfile();
   const energy = useEnergy(profile);
 
-  useEffect(() => { fetchProfile(); }, [fetchProfile]);
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
+  const initial = user?.email?.[0]?.toUpperCase() ?? "?";
 
   return (
     <aside
-      style={{
-        width: collapsed ? 72 : 240,
-        minHeight: '100vh',
-        background: 'var(--bg-card)',
-        borderRight: '1px solid var(--border)',
-        display: 'flex',
-        flexDirection: 'column',
-        transition: 'width 250ms cubic-bezier(0.4,0,0.2,1)',
-        position: 'sticky',
-        top: 0,
-        flexShrink: 0,
-        zIndex: 10,
-        overflow: 'hidden',
-      }}
+      className={`sticky top-0 z-10 flex h-screen shrink-0 flex-col border-r border-zinc-800 bg-zinc-950 text-zinc-200 transition-all duration-300 ease-in-out ${
+        collapsed ? "w-16" : "w-60"
+      }`}
     >
-      {/* Header */}
-      <div style={{
-        padding: collapsed ? '20px 12px' : '20px 20px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: collapsed ? 'center' : 'space-between',
-        borderBottom: '1px solid var(--border)',
-        gap: 12,
-      }}>
+      {/* ── Logo / collapse ─────────────────────────────── */}
+      <div
+        className={`flex items-center border-b border-zinc-800 p-4 min-h-16 ${
+          collapsed ? "justify-center" : "justify-between"
+        }`}
+      >
         {!collapsed && (
-          <div>
-            <div style={{ fontSize: 18, fontWeight: 800 }} className="grad-text">
-              ⚡ SmartSched
+          <div className="flex items-center gap-2.5 min-w-0 sh-fade-up">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400">
+              <Zap className="h-4 w-4 fill-indigo-400/20" />
             </div>
+            <span className="font-semibold tracking-tight text-zinc-100 truncate">
+              SmartSched
+            </span>
           </div>
         )}
+
         <button
-          className="btn-icon"
-          onClick={() => setCollapsed(c => !c)}
-          title={collapsed ? 'ขยาย sidebar' : 'ย่อ sidebar'}
-          style={{ cursor: 'pointer', fontSize: 16 }}
+          onClick={() => setCollapsed((c) => !c)}
+          title={collapsed ? "ขยาย" : "ย่อ"}
+          className="sh-btn-ghost flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-zinc-400 hover:text-zinc-100 transition-colors duration-200"
         >
-          {collapsed ? '›' : '‹'}
+          {collapsed ? (
+            <ChevronRight className="h-4 w-4" />
+          ) : (
+            <ChevronLeft className="h-4 w-4" />
+          )}
         </button>
       </div>
 
-      {/* Energy Gauge (mini) */}
-      {!collapsed && (
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
+      {/* ── Energy gauge ────────────────────────────────── */}
+      <div
+        className={`border-b border-zinc-800 py-4 transition-all duration-300 ${
+          collapsed ? "px-3 flex justify-center" : "px-4"
+        }`}
+      >
+        <div
+          className={`overflow-hidden transition-all duration-300 ${
+            collapsed ? "w-10 h-10" : "w-full"
+          }`}
+        >
           <EnergyGauge energy={energy} compact />
         </div>
-      )}
+      </div>
 
-      {/* Nav Links */}
-      <nav style={{ flex: 1, padding: '12px 8px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {navItems.map(item => {
-          const active = pathname === item.href || pathname.startsWith(item.href + '/');
+      {/* ── Navigation ──────────────────────────────────── */}
+      <nav className="flex-1 flex flex-col gap-1 p-2">
+        {NAV.map(({ href, label, Icon }) => {
+          const active = pathname === href || pathname.startsWith(href + "/");
           return (
             <Link
-              key={item.href}
-              href={item.href}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                padding: collapsed ? '12px' : '11px 14px',
-                borderRadius: 'var(--radius-md)',
-                justifyContent: collapsed ? 'center' : 'flex-start',
-                textDecoration: 'none',
-                fontWeight: active ? 600 : 400,
-                fontSize: 14,
-                color: active ? 'var(--indigo-light)' : 'var(--text-secondary)',
-                background: active
-                  ? 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1))'
-                  : 'transparent',
-                border: active ? '1px solid rgba(99,102,241,0.2)' : '1px solid transparent',
-                transition: 'all 180ms ease',
-              }}
-              onMouseEnter={e => {
-                if (!active) {
-                  (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)';
-                  (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)';
-                }
-              }}
-              onMouseLeave={e => {
-                if (!active) {
-                  (e.currentTarget as HTMLElement).style.background = 'transparent';
-                  (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)';
-                }
-              }}
+              key={href}
+              href={href}
+              title={collapsed ? label : undefined}
+              className={`flex items-center gap-3 rounded-md py-2.5 transition-colors duration-200 ${
+                active
+                  ? "bg-zinc-800 text-zinc-100"
+                  : "text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100"
+              } ${collapsed ? "justify-center px-0" : "px-3 text-sm font-medium"}`}
             >
-              <span style={{ fontSize: 18, flexShrink: 0 }}>{item.icon}</span>
-              {!collapsed && <span>{item.label}</span>}
+              <Icon className="h-4 w-4 shrink-0" />
+              {!collapsed && <span className="truncate">{label}</span>}
             </Link>
           );
         })}
       </nav>
 
-      {/* User / Sign Out */}
-      <div style={{
-        padding: collapsed ? '12px 8px' : '12px 20px',
-        borderTop: '1px solid var(--border)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: collapsed ? 'center' : 'space-between',
-        gap: 12,
-      }}>
-        {!collapsed && (
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {user?.email}
-            </div>
-          </div>
-        )}
-        <button
-          className="btn-icon"
-          onClick={signOut}
-          title="ออกจากระบบ"
-          style={{ fontSize: 16, flexShrink: 0 }}
+      {/* ── User row ────────────────────────────────────── */}
+      <div className="mt-auto border-t border-zinc-800 p-3">
+        <div
+          className={`flex gap-3 transition-all duration-300 ${
+            collapsed ? "flex-col items-center" : "items-center justify-between"
+          }`}
         >
-          ⏻
-        </button>
+          <div className="flex min-w-0 items-center gap-2.5">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-800 border border-zinc-700 text-xs font-semibold text-zinc-200">
+              {initial}
+            </div>
+            {!collapsed && (
+              <div className="min-w-0 sh-fade-up">
+                <p className="truncate text-xs font-medium text-zinc-200">
+                  {user?.email}
+                </p>
+                <p className="text-[10px] text-zinc-500 flex items-center gap-1 mt-0.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Active
+                </p>
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={signOut}
+            title="ออกจากระบบ"
+            className="sh-btn-ghost flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-zinc-400 hover:bg-rose-950/30 hover:text-rose-400 border border-transparent hover:border-rose-900/30 transition-all duration-200"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </aside>
   );

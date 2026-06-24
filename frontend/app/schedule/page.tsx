@@ -9,6 +9,16 @@ import { useEnergy } from "@/hooks/useEnergy";
 import Sidebar from "@/components/Sidebar";
 import ScheduleTimeline from "@/components/ScheduleTimeline";
 import EnergyGauge from "@/components/EnergyGauge";
+import MiniCalendar from "@/components/MiniCalendar";
+import {
+  Clock,
+  Lightbulb,
+  Zap,
+  Smile,
+  Sparkles,
+  Trash2,
+  CalendarCheck,
+} from "lucide-react";
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -44,19 +54,13 @@ export default function SchedulePage() {
     }
   }, [user, date, fetchSchedules, fetchProfile]);
 
-  if (authLoading || !user)
+  if (authLoading || !user) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div className="spinner" style={{ width: 32, height: 32 }} />
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-zinc-800 border-t-indigo-500 rounded-full animate-spin" />
       </div>
     );
+  }
 
   const handleGenerate = async () => {
     setGenerating(true);
@@ -77,7 +81,7 @@ export default function SchedulePage() {
     setMessage("");
     try {
       await clearDay(date);
-      setMessage("ล้างตารางเรียบร้อย");
+      setMessage("ล้างตารางสำหรับวันนี้เรียบร้อย");
     } catch (error) {
       console.error("Clear schedule error:", error);
       setMessage("ล้างตารางไม่สำเร็จ");
@@ -95,128 +99,126 @@ export default function SchedulePage() {
       return acc + mins;
     }, 0);
 
+  // สรุปจำนวนงานของวันที่เลือก
+  const todayTasksCount = schedules.filter(
+    (s) => s.event_type === "Task",
+  ).length;
+
   return (
-    <div className="page-shell">
+    <div className="flex min-h-screen bg-zinc-950">
       <Sidebar />
-      <main className="page-content">
+      <main className="flex-1 min-w-0 p-8 overflow-y-auto max-w-7xl mx-auto sh-fade-up">
         {/* Header */}
-        <div
-          className="page-header"
-          style={{
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            gap: 16,
-            flexWrap: "wrap",
-          }}
-        >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-6 border-b border-zinc-900">
           <div>
-            <h1 className="page-title">◷ Schedule</h1>
-            <p className="page-subtitle">ตารางงานรายวัน</p>
+            <h1 className="text-3xl font-extrabold tracking-tight text-zinc-100 flex items-center gap-2">
+              Schedule Dashboard
+            </h1>
+            <p className="text-sm text-zinc-500 font-medium mt-1">
+              จัดสรรและตรวจสอบวันที่มีภารกิจเพื่อผลลัพธ์ที่ดีที่สุด
+            </p>
           </div>
-          <div
-            style={{
-              display: "flex",
-              gap: 10,
-              alignItems: "center",
-              flexWrap: "wrap",
-            }}
-          >
-            <input
-              type="date"
-              className="input"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              style={{ width: 160 }}
-            />
+
+          <div className="flex gap-2.5 items-center flex-wrap">
             <button
               id="generate-schedule-btn"
-              className="btn btn-primary"
+              className="sh-btn sh-btn-default px-4 py-2.5 text-xs font-semibold flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/10"
               onClick={handleGenerate}
               disabled={generating || clearing}
             >
-              {generating ? (
-                <>
-                  <span className="spinner" /> กำลังจัดตาราง...
-                </>
-              ) : (
-                "🧠 จัดตารางอัตโนมัติ"
-              )}
+              <Sparkles className="w-4 h-4 text-indigo-200" />
+              {generating ? "กำลังวิเคราะห์จัดตาราง..." : "จัดตารางงานอัจฉริยะ"}
             </button>
             <button
               type="button"
-              className="btn btn-ghost"
+              className="sh-btn sh-btn-outline px-4 py-2.5 text-xs font-semibold flex items-center gap-1.5 text-zinc-400 border-zinc-800 hover:text-rose-400 hover:bg-rose-500/5 hover:border-rose-500/20"
               onClick={handleClearDay}
               disabled={clearing || generating || schedules.length === 0}
             >
-              {clearing ? "กำลังล้าง..." : "ล้างข้อมูล"}
+              <Trash2 className="w-4 h-4" />
+              {clearing ? "กำลังล้างตาราง..." : "ล้างตาราง"}
             </button>
           </div>
         </div>
 
-        {/* Message */}
+        {/* Message Banner */}
         {message && (
-          <div
-            style={{
-              padding: "12px 16px",
-              borderRadius: "var(--radius-md)",
-              marginBottom: 20,
-              background: "rgba(34,211,164,0.08)",
-              border: "1px solid rgba(34,211,164,0.2)",
-              fontSize: 13,
-              color: "var(--success)",
-            }}
-          >
-            ✓ {message}
+          <div className="flex items-center gap-2 px-4 py-3 border border-emerald-500/20 bg-emerald-950/10 rounded-md text-xs font-semibold text-emerald-400 mb-6 sh-fade-up">
+            <Smile className="w-4 h-4" />
+            {message}
           </div>
         )}
 
-        {/* 2-column layout */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 280px",
-            gap: 20,
-            alignItems: "start",
-          }}
-        >
-          {/* Timeline */}
-          <div className="glass" style={{ padding: "20px 24px" }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: 16,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 14,
-                  fontWeight: 600,
-                  color: "var(--text-secondary)",
-                }}
-              >
-                {schedules.length > 0
-                  ? `${schedules.length} ช่วงเวลา`
-                  : "ไม่มีตาราง"}
+        {/* 3-column Layout (Calendar | Timeline | Energy) */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+          {/* Column 1: Interactive Monthly Calendar (4 cols on wide screens) */}
+          <div className="xl:col-span-4 flex flex-col gap-4">
+            <MiniCalendar selectedDate={date} onSelectDate={setDate} />
+
+            {/* Quick Status card below calendar */}
+            <div className="sh-card p-5">
+              <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <CalendarCheck className="w-3.5 h-3.5 text-indigo-400" />
+                สถานะวันที่เลือก
+              </div>
+              <div className="flex flex-col gap-2 text-xs font-medium">
+                <div className="flex justify-between py-1.5 border-b border-zinc-900/60 text-zinc-400">
+                  <span>วันที่กำหนด</span>
+                  <span className="text-zinc-200">
+                    {new Date(date).toLocaleDateString("th-TH", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </span>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-zinc-900/60 text-zinc-400">
+                  <span>งานรอทำวันนี้</span>
+                  <span
+                    className={
+                      todayTasksCount > 0
+                        ? "text-indigo-400 font-bold"
+                        : "text-zinc-500"
+                    }
+                  >
+                    {todayTasksCount} งาน
+                  </span>
+                </div>
+                <div className="flex justify-between py-1.5 text-zinc-400">
+                  <span>รวมชั่วโมงงาน</span>
+                  <span
+                    className={
+                      totalDuration > 0
+                        ? "text-emerald-400 font-bold"
+                        : "text-zinc-500"
+                    }
+                  >
+                    {totalDuration > 0
+                      ? `${Math.floor(totalDuration / 60)} ชม. ${totalDuration % 60} น.`
+                      : "0 นาที"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Column 2: Timeline list (5 cols on wide screens) */}
+          <div className="xl:col-span-5 sh-card p-6 flex flex-col min-h-[460px]">
+            <div className="flex items-center justify-between mb-5 pb-4 border-b border-zinc-900">
+              <div className="text-sm font-semibold text-zinc-300 flex items-center gap-2">
+                <Clock className="w-4 h-4 text-zinc-500" />
+                ตารางงานรายวัน
               </div>
               {totalDuration > 0 && (
-                <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
-                  รวม {Math.floor(totalDuration / 60)}ชม {totalDuration % 60}น.
-                </div>
+                <span className="sh-badge sh-badge-secondary text-[10px] font-bold">
+                  {schedules.length} ช่วงเวลารวม
+                </span>
               )}
             </div>
 
             {loading ? (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  padding: 40,
-                }}
-              >
-                <div className="spinner" style={{ width: 28, height: 28 }} />
+              <div className="flex-1 flex items-center justify-center py-20">
+                <div className="w-8 h-8 border-4 border-zinc-800 border-t-indigo-500 rounded-full animate-spin" />
               </div>
             ) : (
               <ScheduleTimeline
@@ -226,71 +228,48 @@ export default function SchedulePage() {
             )}
           </div>
 
-          {/* Sidebar: Energy + Tips */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {/* Energy gauge */}
-            <div
-              className="glass"
-              style={{
-                padding: "20px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: "var(--text-secondary)",
-                  marginBottom: 16,
-                  alignSelf: "flex-start",
-                }}
-              >
-                ⚡ พลังงาน
+          {/* Column 3: Biorythm + Tips (3 cols on wide screens) */}
+          <div className="xl:col-span-3 flex flex-col gap-6">
+            {/* Energy Gauge Widget */}
+            <div className="sh-card p-5 flex flex-col items-center">
+              <div className="text-sm font-semibold text-zinc-300 flex items-center gap-2 self-start mb-6 pb-3 border-b border-zinc-900 w-full">
+                <Zap className="w-4 h-4 text-indigo-400" />
+                ช่วงระดับพลังงาน
               </div>
               <EnergyGauge energy={energy} />
             </div>
 
-            {/* Profile summary */}
+            {/* Profile Energy summary */}
             {profile?.peak_time_start && (
-              <div className="glass" style={{ padding: "16px 18px" }}>
-                <div
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: "var(--text-secondary)",
-                    marginBottom: 12,
-                  }}
-                >
-                  🕐 ช่วงเวลาของคุณ
+              <div className="sh-card p-5 flex flex-col">
+                <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-4 flex items-center gap-1.5 pb-2 border-b border-zinc-900">
+                  <Clock className="w-3.5 h-3.5 text-zinc-500" />
+                  ช่วงพลังงานของคุณ
                 </div>
-                <div
-                  style={{ display: "flex", flexDirection: "column", gap: 8 }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      fontSize: 12,
-                    }}
-                  >
-                    <span style={{ color: "var(--success)" }}>🔥 Peak</span>
-                    <span style={{ color: "var(--text-secondary)" }}>
-                      {profile.peak_time_start} – {profile.peak_time_end}
-                    </span>
-                  </div>
-                  {profile.dip_time_start && (
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        fontSize: 12,
-                      }}
-                    >
-                      <span style={{ color: "var(--danger)" }}>😴 Dip</span>
-                      <span style={{ color: "var(--text-secondary)" }}>
-                        {profile.dip_time_start} – {profile.dip_time_end}
+
+                <div className="flex flex-col gap-3.5">
+                  {profile.peak_time_start && profile.peak_time_end && (
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                        🔥 Peak (สูงสุด)
+                      </span>
+                      <span className="font-semibold text-zinc-300 bg-zinc-900 px-2 py-1 rounded border border-zinc-800/60">
+                        {profile.peak_time_start.slice(0, 5)} –{" "}
+                        {profile.peak_time_end.slice(0, 5)}
+                      </span>
+                    </div>
+                  )}
+
+                  {profile.dip_time_start && profile.dip_time_end && (
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-rose-500 font-semibold flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                        😴 Dip (ตกต่ำสุด)
+                      </span>
+                      <span className="font-semibold text-zinc-300 bg-zinc-900 px-2 py-1 rounded border border-zinc-800/60">
+                        {profile.dip_time_start.slice(0, 5)} –{" "}
+                        {profile.dip_time_end.slice(0, 5)}
                       </span>
                     </div>
                   )}
@@ -298,29 +277,27 @@ export default function SchedulePage() {
               </div>
             )}
 
-            {/* Tips */}
-            <div className="glass" style={{ padding: "16px 18px" }}>
-              <div
-                style={{
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: "var(--text-secondary)",
-                  marginBottom: 10,
-                }}
-              >
-                💡 Tips
+            {/* AI Smart Tips */}
+            <div className="sh-card p-5 flex flex-col">
+              <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
+                Smart Tips
               </div>
-              <ul
-                style={{
-                  fontSize: 12,
-                  color: "var(--text-muted)",
-                  lineHeight: 1.8,
-                  paddingLeft: 14,
-                }}
-              >
-                <li>ลาก ⠿ เพื่อจัดลำดับใหม่</li>
-                <li>งานยาก → จัดช่วง Peak</li>
-                <li>พัก 15 นาทีทุก 2 ชั่วโมง</li>
+              <ul className="text-xs text-zinc-500 font-medium leading-relaxed list-none flex flex-col gap-2">
+                <li className="flex gap-1.5 items-start">
+                  <span className="text-indigo-400 font-bold mt-0.5">•</span>
+                  <span>
+                    เลือกวันที่มีสัญลักษณ์จุด purple glow
+                    ใต้เลขปฏิทินเพื่อดูงานวันนั้นๆ
+                  </span>
+                </li>
+                <li className="flex gap-1.5 items-start">
+                  <span className="text-indigo-400 font-bold mt-0.5">•</span>
+                  <span>
+                    ลากเครื่องหมาย ⠿ ในตาราง Timeline
+                    เพื่อทำการปรับสลับเวลาตามที่ชอบ
+                  </span>
+                </li>
               </ul>
             </div>
           </div>

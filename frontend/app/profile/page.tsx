@@ -44,6 +44,8 @@ export default function ProfilePage() {
   const [dipStart, setDipStart] = useState("");
   const [dipEnd, setDipEnd] = useState("");
   const [saved, setSaved] = useState(false);
+  const [lineUserId, setLineUserId] = useState("");
+  const [lineSaved, setLineSaved] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -61,6 +63,7 @@ export default function ProfilePage() {
       setPeakEnd(profile.peak_time_end?.slice(0, 5) ?? "");
       setDipStart(profile.dip_time_start?.slice(0, 5) ?? "");
       setDipEnd(profile.dip_time_end?.slice(0, 5) ?? "");
+      setLineUserId(profile.line_user_id ?? "");
     }
   }, [profile]);
 
@@ -82,6 +85,14 @@ export default function ProfilePage() {
       if (!peakEnd) setPeakEnd("00:00");
       if (!dipStart) setDipStart("09:00");
       if (!dipEnd) setDipEnd("11:00");
+    }
+  };
+
+  const handleSaveLine = async () => {
+    const ok = await saveProfile({ line_user_id: lineUserId.trim() || null });
+    if (ok) {
+      setLineSaved(true);
+      setTimeout(() => setLineSaved(false), 3000);
     }
   };
 
@@ -338,6 +349,77 @@ export default function ProfilePage() {
                 />
               </div>
             </div>
+          </div>
+
+          {/* LINE Notification */}
+          <div className="glass" style={{ padding: "24px" }}>
+            <div
+              style={{
+                fontSize: 15,
+                fontWeight: 700,
+                marginBottom: 4,
+                color: "#06c755",
+              }}
+            >
+              💬 LINE Notification
+            </div>
+            <div
+              style={{
+                fontSize: 13,
+                color: "var(--text-muted)",
+                marginBottom: 18,
+                lineHeight: 1.6,
+              }}
+            >
+              รับแจ้งเตือนงานผ่าน LINE เมื่องานจะเริ่มใน 5 นาที
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <label className="input-label">LINE User ID</label>
+              <input
+                type="text"
+                className="input"
+                placeholder="Uxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                value={lineUserId}
+                onChange={(e) => setLineUserId(e.target.value)}
+              />
+              <div
+                style={{
+                  fontSize: 11,
+                  color: "var(--text-muted)",
+                  marginTop: 6,
+                  lineHeight: 1.5,
+                }}
+              >
+                วิธีหา LINE User ID: ส่งข้อความใดก็ได้ไปที่บอทของเรา
+                แล้วบอทจะตอบกลับ ID ให้ทันที
+              </div>
+            </div>
+
+            {lineSaved && (
+              <div
+                style={{
+                  padding: "10px 14px",
+                  borderRadius: "var(--radius-sm)",
+                  marginBottom: 12,
+                  background: "rgba(6,199,85,0.1)",
+                  border: "1px solid rgba(6,199,85,0.25)",
+                  fontSize: 13,
+                  color: "#06c755",
+                }}
+              >
+                ✓ บันทึก LINE User ID แล้ว
+              </div>
+            )}
+
+            <button
+              className="btn btn-primary"
+              onClick={handleSaveLine}
+              disabled={loading}
+              style={{ padding: "10px 22px", fontSize: 14 }}
+            >
+              💬 บันทึก LINE User ID
+            </button>
           </div>
 
           {/* Error / Success */}

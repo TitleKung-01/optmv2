@@ -1,88 +1,111 @@
-'use client';
+"use client";
 
-import { useBurnout } from '@/hooks/useBurnout';
+import { useBurnout } from "@/hooks/useBurnout";
+import {
+  AlertCircle,
+  Flame,
+  ShieldAlert,
+  Heart,
+  TrendingUp,
+} from "lucide-react";
 
 export default function BurnoutWidget() {
   const { data, loading } = useBurnout();
 
   if (loading || !data) {
     return (
-      <div className="glass" style={{ padding: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', height: 260 }}>
-        <div className="spinner" style={{ width: 32, height: 32 }} />
+      <div className="sh-card flex items-center justify-center h-[260px]">
+        <div className="sh-skeleton w-full h-full" />
       </div>
     );
   }
 
   const { score, level, factors } = data;
 
-  let color = 'var(--success)';
-  let message = 'พลังงานดีเยี่ยม ตารางงานสมดุล';
-  let icon = '🟢';
-  if (level === 'Warning') {
-    color = 'var(--warning)';
-    message = 'เริ่มมีความตึงเครียด แนะนำให้กระจายงาน';
-    icon = '🟡';
-  } else if (level === 'Critical') {
-    color = 'var(--danger)';
-    message = 'เสี่ยงภาวะหมดไฟ! แนะนำให้พักเต็มวัน';
-    icon = '🔴';
+  let colorClass = "text-emerald-400";
+  let strokeColor = "rgba(16,185,129,1)";
+  let message = "พลังงานดีเยี่ยม ตารางงานสมดุลดีมาก";
+  let Icon = Heart;
+
+  if (level === "Warning") {
+    colorClass = "text-amber-500";
+    strokeColor = "rgba(245,158,11,1)";
+    message = "เริ่มมีความตึงเครียด แนะนำกระจายงาน";
+    Icon = ShieldAlert;
+  } else if (level === "Critical") {
+    colorClass = "text-rose-500";
+    strokeColor = "rgba(244,63,94,1)";
+    message = "เสี่ยงภาวะหมดไฟ แนะนำพักเต็มวัน";
+    Icon = Flame;
   }
 
   // Semi-circle gauge math
-  // R = 120, cx = 140, cy = 140
   const r = 120;
   const circumference = Math.PI * r;
   const strokeDashoffset = circumference - (score / 100) * circumference;
 
   return (
-    <div className="glass anim-fade-up" style={{ padding: '24px', display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 20 }}>🌡️</span> Burnout Risk
+    <div className="sh-card p-5 flex flex-col h-full sh-fade-up">
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="text-sm font-semibold text-zinc-300 flex items-center gap-2 tracking-tight">
+          <Icon className={`w-4 h-4 ${colorClass}`} />
+          Burnout Risk Indicator
         </h3>
       </div>
 
       {/* Gauge */}
-      <div style={{ position: 'relative', width: 280, height: 150, margin: '0 auto', display: 'flex', justifyContent: 'center' }}>
-        <svg width="280" height="150" viewBox="0 0 280 150">
+      <div className="relative w-[280px] h-[140px] mx-auto flex justify-center mb-2">
+        <svg
+          width="280"
+          height="140"
+          viewBox="0 0 280 140"
+          className="overflow-visible"
+        >
           {/* Background Arc */}
           <path
             d="M 20 140 A 120 120 0 0 1 260 140"
             fill="none"
-            stroke="rgba(255,255,255,0.05)"
-            strokeWidth="16"
+            stroke="rgba(255,255,255,0.03)"
+            strokeWidth="12"
             strokeLinecap="round"
           />
           {/* Progress Arc */}
           <path
             d="M 20 140 A 120 120 0 0 1 260 140"
             fill="none"
-            stroke={color}
-            strokeWidth="16"
+            stroke={strokeColor}
+            strokeWidth="12"
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
-            style={{ transition: 'stroke-dashoffset 1.5s ease-out, stroke 0.5s ease' }}
+            style={{
+              transition:
+                "stroke-dashoffset 1.5s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.5s ease",
+              filter: `drop-shadow(0 0 4px ${strokeColor}44)`,
+            }}
           />
         </svg>
 
         {/* Text inside gauge */}
-        <div style={{ position: 'absolute', bottom: 10, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div style={{ fontSize: 48, fontWeight: 800, lineHeight: 1, letterSpacing: -1, color: 'var(--text-primary)' }}>
-            {score}<span style={{ fontSize: 24, color: 'var(--text-muted)' }}>%</span>
+        <div className="absolute bottom-4 flex flex-col items-center">
+          <div className="text-4xl font-extrabold tracking-tight leading-none text-zinc-100 flex items-baseline">
+            {score}
+            <span className="text-sm font-semibold text-zinc-500 ml-1">%</span>
           </div>
-          <div style={{ fontSize: 13, fontWeight: 600, color, marginTop: 4 }}>
-            {level.toUpperCase()}
+          <div
+            className={`text-[10px] font-bold tracking-widest uppercase mt-2 ${colorClass}`}
+          >
+            {level}
           </div>
         </div>
       </div>
 
-      <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-muted)', marginBottom: 24 }}>
-        {icon} {message}
+      <div className="text-center text-xs text-zinc-400 font-medium leading-relaxed mb-6">
+        {message}
       </div>
 
       {/* Factors Breakdown */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 'auto' }}>
+      <div className="flex flex-col gap-4 mt-auto">
         <FactorRow
           label={factors.overdue.label}
           val={`${factors.overdue.score}/${factors.overdue.max}`}
@@ -112,16 +135,42 @@ export default function BurnoutWidget() {
   );
 }
 
-function FactorRow({ label, val, pct, desc }: { label: string; val: string; pct: number; desc: string }) {
-  const barColor = pct > 75 ? 'var(--danger)' : pct > 40 ? 'var(--warning)' : 'var(--success)';
+function FactorRow({
+  label,
+  val,
+  pct,
+  desc,
+}: {
+  label: string;
+  val: string;
+  pct: number;
+  desc: string;
+}) {
+  const barColor =
+    pct > 75 ? "bg-rose-500" : pct > 40 ? "bg-amber-500" : "bg-emerald-500";
+  const glowColor =
+    pct > 75
+      ? "shadow-[0_0_8px_rgba(244,63,94,0.3)]"
+      : pct > 40
+        ? "shadow-[0_0_8px_rgba(245,158,11,0.3)]"
+        : "shadow-[0_0_8px_rgba(16,185,129,0.3)]";
+
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
-        <span style={{ color: 'var(--text-secondary)' }}>{label} <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>({desc})</span></span>
-        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{val}</span>
+    <div className="group">
+      <div className="flex justify-between items-baseline text-xs mb-1.5">
+        <span className="text-zinc-400 font-medium group-hover:text-zinc-300 transition-colors">
+          {label}{" "}
+          <span className="text-[10px] text-zinc-500 font-semibold tracking-wider uppercase ml-1">
+            ({desc})
+          </span>
+        </span>
+        <span className="font-semibold text-zinc-300">{val}</span>
       </div>
-      <div style={{ width: '100%', height: 6, background: 'rgba(255,255,255,0.05)', borderRadius: 3, overflow: 'hidden' }}>
-        <div style={{ width: `${pct}%`, height: '100%', background: barColor, transition: 'width 1s ease-out' }} />
+      <div className="w-full h-1.5 bg-zinc-800/60 rounded-full overflow-hidden">
+        <div
+          className={`h-full rounded-full ${barColor} ${glowColor} transition-all duration-1000 cubic-bezier(0.16, 1, 0.3, 1)`}
+          style={{ width: `${pct}%` }}
+        />
       </div>
     </div>
   );

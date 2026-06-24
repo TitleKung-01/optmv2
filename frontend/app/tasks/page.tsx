@@ -9,6 +9,14 @@ import Sidebar from "@/components/Sidebar";
 import TaskCard from "@/components/TaskCard";
 import TaskForm from "@/components/TaskForm";
 import type { Task, TaskStatus } from "@/lib/types";
+import {
+  Plus,
+  Trash2,
+  Search,
+  Filter as FilterIcon,
+  Loader2,
+  Sparkles,
+} from "lucide-react";
 
 type Filter = "All" | TaskStatus;
 
@@ -51,19 +59,13 @@ export default function TasksPage() {
     }
   }, [user, fetchTasks]);
 
-  if (authLoading || !user)
+  if (authLoading || !user) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div className="spinner" style={{ width: 32, height: 32 }} />
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-zinc-800 border-t-indigo-500 rounded-full animate-spin" />
       </div>
     );
+  }
 
   const filtered = tasks.filter((t) => {
     if (filter !== "All" && t.status !== filter) return false;
@@ -120,115 +122,105 @@ export default function TasksPage() {
   };
 
   return (
-    <div className="page-shell">
+    <div className="flex min-h-screen bg-zinc-950">
       <Sidebar />
-      <main className="page-content">
+      <main className="flex-1 min-w-0 p-8 overflow-y-auto max-w-7xl mx-auto sh-fade-up">
         {/* Header */}
-        <div
-          className="page-header"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 16,
-          }}
-        >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-6 border-b border-zinc-900">
           <div>
-            <h1 className="page-title">✦ Tasks</h1>
-            <p className="page-subtitle">จัดการงานทั้งหมดของคุณ</p>
+            <h1 className="text-3xl font-extrabold tracking-tight text-zinc-100 flex items-center gap-2">
+              Tasks
+            </h1>
+            <p className="text-sm text-zinc-500 font-medium mt-1">
+              คลังงานและภารกิจส่วนตัวทั้งหมดของคุณ
+            </p>
           </div>
-          <div
-            style={{
-              display: "flex",
-              gap: 10,
-              alignItems: "center",
-              flexWrap: "wrap",
-            }}
-          >
+          <div className="flex gap-2.5 items-center">
             <button
               id="add-task-btn"
-              className="btn btn-primary"
+              className="sh-btn sh-btn-default px-4 py-2.5 text-xs font-semibold flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/10"
               onClick={() => {
                 setEditingTask(null);
                 setShowForm(true);
               }}
             >
-              + เพิ่มงาน
+              <Plus className="w-4 h-4" />
+              สร้างงานใหม่
             </button>
             <button
               type="button"
-              className="btn btn-ghost"
+              className="sh-btn sh-btn-outline px-4 py-2.5 text-xs font-semibold flex items-center gap-1.5 text-zinc-400 border-zinc-800 hover:text-rose-400 hover:bg-rose-500/5 hover:border-rose-500/20"
               onClick={handleClearAll}
               disabled={clearing || tasks.length === 0}
             >
-              {clearing ? "กำลังล้าง..." : "ล้างข้อมูล"}
+              <Trash2 className="w-4 h-4" />
+              {clearing ? "กำลังล้าง..." : "ล้างคลังงาน"}
             </button>
           </div>
         </div>
 
-        {/* Filter + Search */}
-        <div
-          style={{
-            display: "flex",
-            gap: 12,
-            marginBottom: 24,
-            flexWrap: "wrap",
-            alignItems: "center",
-          }}
-        >
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {FILTERS.map((f) => (
-              <button
-                key={f.key}
-                onClick={() => setFilter(f.key)}
-                className={
-                  filter === f.key
-                    ? "btn btn-primary btn-sm"
-                    : "btn btn-ghost btn-sm"
-                }
-              >
-                {f.label}
-                {f.key === "All" && (
-                  <span style={{ marginLeft: 4, fontSize: 11, opacity: 0.7 }}>
-                    ({tasks.length})
-                  </span>
-                )}
-              </button>
-            ))}
+        {/* Filters and Search Control Grid */}
+        <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between mb-6">
+          {/* Filter Tabs */}
+          <div className="flex p-1 bg-zinc-900/60 border border-zinc-800 rounded-lg max-w-fit">
+            {FILTERS.map((f) => {
+              const active = filter === f.key;
+              return (
+                <button
+                  key={f.key}
+                  onClick={() => setFilter(f.key)}
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                    active
+                      ? "bg-zinc-800 text-zinc-100 shadow-sm"
+                      : "text-zinc-500 hover:text-zinc-300"
+                  }`}
+                >
+                  {f.label}
+                  {f.key === "All" && (
+                    <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full bg-zinc-900 text-zinc-400 border border-zinc-800">
+                      {tasks.length}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
-          <input
-            className="input"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="🔍 ค้นหาชื่องาน หรือหมวดหมู่..."
-            style={{ maxWidth: 260 }}
-          />
+
+          {/* Search Box */}
+          <div className="relative max-w-full md:max-w-[280px] w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+            <input
+              className="sh-input pl-9 text-xs"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="ค้นหาชื่องาน หรือหมวดหมู่..."
+            />
+          </div>
         </div>
 
-        {/* Task List */}
+        {/* Task List Grid */}
         {loading ? (
-          <div
-            style={{ display: "flex", justifyContent: "center", padding: 60 }}
-          >
-            <div className="spinner" style={{ width: 32, height: 32 }} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="sh-card h-32 sh-skeleton" />
+            ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-state-icon">📋</div>
-            <div className="empty-state-title">
-              {search ? "ไม่พบงานที่ตรงกัน" : "ยังไม่มีงาน"}
-            </div>
-            <p style={{ fontSize: 13 }}>
+          <div className="sh-card flex flex-col items-center justify-center py-20 text-center border-dashed border-zinc-800">
+            <FilterIcon className="w-10 h-10 text-zinc-700 mb-3 stroke-[1.5]" />
+            <h3 className="text-sm font-semibold text-zinc-300 mb-1">
               {search
-                ? "ลองค้นหาด้วยคีย์เวิร์ดอื่น"
-                : 'กดปุ่ม "+ เพิ่มงาน" เพื่อเริ่มต้น'}
+                ? "ไม่พบคู่ผลลัพธ์ที่ค้นหา"
+                : "ยังไม่มีงานที่ตรงกับหมวดหมู่"}
+            </h3>
+            <p className="text-xs text-zinc-500 max-w-[280px]">
+              {search
+                ? "ลองใช้คีย์เวิร์ดอื่นในการค้นหา หรือล้างคำค้นหา"
+                : 'เริ่มสร้างงานชิ้นแรกด้วยปุ่ม "+ สร้างงานใหม่" ด้านบน'}
             </p>
           </div>
         ) : (
-          <div
-            className="stagger"
-            style={{ display: "flex", flexDirection: "column", gap: 12 }}
-          >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map((task) => (
               <TaskCard
                 key={task.id}

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import type { EnergyState } from '@/lib/types';
+import type { EnergyState } from "@/lib/types";
 
 interface Props {
   energy: EnergyState;
@@ -10,44 +10,71 @@ interface Props {
 export default function EnergyGauge({ energy, compact = false }: Props) {
   const { level, percentage, label } = energy;
 
-  const color =
-    level === 'peak'   ? '#22d3a4' :
-    level === 'dip'    ? '#f43f5e' :
-                         '#6366f1';
+  const colorClass =
+    level === "peak"
+      ? "text-emerald-400"
+      : level === "dip"
+        ? "text-rose-500"
+        : "text-indigo-400";
+
+  const strokeColor =
+    level === "peak"
+      ? "rgba(16,185,129,1)"
+      : level === "dip"
+        ? "rgba(244,63,94,1)"
+        : "rgba(99,102,241,1)";
 
   const glowColor =
-    level === 'peak'   ? 'rgba(34,211,164,0.4)'  :
-    level === 'dip'    ? 'rgba(244,63,94,0.4)'   :
-                         'rgba(99,102,241,0.4)';
+    level === "peak"
+      ? "rgba(16,185,129,0.3)"
+      : level === "dip"
+        ? "rgba(244,63,94,0.3)"
+        : "rgba(99,102,241,0.3)";
 
   if (compact) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div className="flex items-center gap-3">
         {/* Mini arc */}
-        <div style={{ position: 'relative', width: 40, height: 40, flexShrink: 0 }}>
+        <div className="relative w-10 h-10 flex-shrink-0">
           <svg viewBox="0 0 40 40" width="40" height="40">
-            <circle cx="20" cy="20" r="15" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="4" />
             <circle
-              cx="20" cy="20" r="15" fill="none"
-              stroke={color}
-              strokeWidth="4"
+              cx="20"
+              cy="20"
+              r="15"
+              fill="none"
+              stroke="rgba(255,255,255,0.04)"
+              strokeWidth="3"
+            />
+            <circle
+              cx="20"
+              cy="20"
+              r="15"
+              fill="none"
+              stroke={strokeColor}
+              strokeWidth="3.5"
               strokeLinecap="round"
               strokeDasharray={`${(percentage / 100) * 94.2} 94.2`}
               strokeDashoffset="23.55"
-              style={{ transition: 'stroke-dasharray 0.6s ease, stroke 0.4s ease', filter: `drop-shadow(0 0 4px ${glowColor})` }}
+              style={{
+                transition:
+                  "stroke-dasharray 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+                filter: `drop-shadow(0 0 2px ${glowColor})`,
+              }}
             />
           </svg>
-          <div style={{
-            position: 'absolute', inset: 0, display: 'flex',
-            alignItems: 'center', justifyContent: 'center',
-            fontSize: 9, fontWeight: 700, color,
-          }}>
-            {percentage}
+          <div
+            className={`absolute inset-0 flex items-center justify-center text-[10px] font-bold ${colorClass}`}
+          >
+            {percentage}%
           </div>
         </div>
-        <div>
-          <div style={{ fontSize: 12, fontWeight: 600, color }}>{label}</div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Energy</div>
+        <div className="min-w-0">
+          <div className={`text-xs font-semibold truncate ${colorClass}`}>
+            {label}
+          </div>
+          <div className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider">
+            Energy Level
+          </div>
         </div>
       </div>
     );
@@ -56,83 +83,83 @@ export default function EnergyGauge({ energy, compact = false }: Props) {
   // Full gauge
   const r = 54;
   const circ = 2 * Math.PI * r;
-  // Show 270° arc (from 135° to 405°)
   const arcLength = circ * 0.75;
   const filled = arcLength * (percentage / 100);
   const gap = arcLength - filled;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-      <div style={{ position: 'relative', width: 160, height: 160 }}>
-        <svg viewBox="0 0 140 140" width="160" height="160" style={{ overflow: 'visible' }}>
+    <div className="flex flex-col items-center gap-4 w-full">
+      <div className="relative w-40 h-40 flex items-center justify-center">
+        <svg
+          viewBox="0 0 140 140"
+          width="160"
+          height="160"
+          className="overflow-visible"
+        >
           {/* Track */}
           <circle
-            cx="70" cy="70" r={r}
+            cx="70"
+            cy="70"
+            r={r}
             fill="none"
-            stroke="rgba(255,255,255,0.06)"
-            strokeWidth="10"
+            stroke="rgba(255,255,255,0.04)"
+            strokeWidth="8"
             strokeLinecap="round"
             strokeDasharray={`${arcLength} ${circ - arcLength}`}
             strokeDashoffset={circ * 0.125}
           />
           {/* Fill */}
           <circle
-            cx="70" cy="70" r={r}
+            cx="70"
+            cy="70"
+            r={r}
             fill="none"
-            stroke={color}
-            strokeWidth="10"
+            stroke={strokeColor}
+            strokeWidth="9.5"
             strokeLinecap="round"
             strokeDasharray={`${filled} ${gap + circ * 0.25}`}
             strokeDashoffset={circ * 0.125}
             style={{
-              transition: 'stroke-dasharray 0.8s cubic-bezier(0.4,0,0.2,1), stroke 0.4s ease',
-              filter: `drop-shadow(0 0 8px ${glowColor})`,
+              transition: "stroke-dasharray 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
+              filter: `drop-shadow(0 0 6px ${glowColor})`,
             }}
           />
         </svg>
         {/* Center text */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          gap: 2,
-        }}>
-          <div style={{ fontSize: 32, fontWeight: 800, color, lineHeight: 1 }}>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <div
+            className={`text-3xl font-extrabold tracking-tight leading-none ${colorClass}`}
+          >
             {percentage}
           </div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500 }}>%</div>
+          <div className="text-[11px] text-zinc-500 font-semibold uppercase tracking-wider mt-1">
+            %
+          </div>
         </div>
       </div>
 
-      <div style={{ textAlign: 'center' }}>
-        <div style={{
-          fontSize: 16, fontWeight: 700, color,
-          textShadow: `0 0 12px ${glowColor}`,
-        }}>
+      <div className="text-center">
+        <div className={`text-base font-bold tracking-tight ${colorClass}`}>
           {label}
         </div>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
-          ระดับพลังงาน
+        <div className="text-xs text-zinc-400 mt-0.5">
+          ระดับพลังงานชีวภาพขณะนี้
         </div>
       </div>
 
       {/* Level bar */}
-      <div style={{ width: '100%', maxWidth: 200 }}>
-        <div style={{
-          height: 6, borderRadius: 99,
-          background: 'rgba(255,255,255,0.06)',
-          overflow: 'hidden',
-        }}>
-          <div style={{
-            height: '100%',
-            width: `${percentage}%`,
-            background: `linear-gradient(90deg, ${color}, ${color}99)`,
-            borderRadius: 99,
-            transition: 'width 0.8s ease',
-            boxShadow: `0 0 8px ${glowColor}`,
-          }} />
+      <div className="w-full max-w-[200px]">
+        <div className="h-1.5 rounded-full bg-zinc-800/80 overflow-hidden">
+          <div
+            className="h-full rounded-full transition-all duration-1000 cubic-bezier(0.16, 1, 0.3, 1)"
+            style={{
+              width: `${percentage}%`,
+              backgroundColor: strokeColor,
+              boxShadow: `0 0 8px ${glowColor}`,
+            }}
+          />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 10, color: 'var(--text-muted)' }}>
+        <div className="flex justify-between mt-2 text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">
           <span>ต่ำ</span>
           <span>ปกติ</span>
           <span>Peak</span>
