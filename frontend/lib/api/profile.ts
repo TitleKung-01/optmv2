@@ -21,8 +21,11 @@ export async function updateUserProfile(updates: Partial<UserProfile>): Promise<
 
   const { data, error } = await supabase
     .from('users')
-    .update(updates)
-    .eq('id', user.id)
+    .upsert({
+      id: user.id,
+      email: user.email,
+      ...updates,
+    })
     .select()
     .single();
 

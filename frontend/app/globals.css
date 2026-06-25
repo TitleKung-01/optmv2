@@ -1,41 +1,219 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
 
-/* ─── Shadcn UI Design Tokens (Zinc Theme Dark) ────────────────────────────── */
+@theme {
+  --color-zinc-950: hsl(var(--background));
+  --color-zinc-900: hsl(var(--card));
+  --color-zinc-800: hsl(var(--border));
+  --color-zinc-700: hsl(var(--border) / 1.2);
+  --color-zinc-600: hsl(var(--muted-foreground) / 0.8);
+  --color-zinc-500: hsl(var(--muted-foreground) / 0.9);
+  --color-zinc-400: hsl(var(--muted-foreground));
+  --color-zinc-300: hsl(var(--foreground) / 0.7);
+  --color-zinc-200: hsl(var(--foreground) / 0.85);
+  --color-zinc-100: hsl(var(--foreground));
+
+  --color-primary-fixed-dim: #d2bbff;
+  --color-secondary-container: #e3e1ed;
+  --color-on-tertiary-fixed-variant: #404758;
+  --color-on-tertiary-container: #dfe5fa;
+  --color-primary-container: #7c3aed;
+  --color-inverse-primary: #d2bbff;
+  --color-on-secondary-container: #64636d;
+  --color-on-tertiary-fixed: #141b2b;
+  --color-tertiary-fixed: #dce2f7;
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+  --color-on-secondary: #ffffff;
+  --color-on-error: #ffffff;
+  --color-inverse-surface: #2e3132;
+  --color-tertiary-container: #5f6678;
+  --color-on-surface: #191c1d;
+  --color-surface-bright: #f8f9fa;
+  --color-primary-fixed: #eaddff;
+  --color-surface-container-high: #e7e8e9;
+  --color-surface: #f8f9fa;
+  --color-inverse-on-surface: #f0f1f2;
+  --color-on-surface-variant: #4a4455;
+  --color-on-primary: #ffffff;
+  --color-surface-dim: #d9dadb;
+  --color-outline: #7b7487;
+  --color-secondary-fixed: #e3e1ed;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f3f4f5;
+  --color-surface-container: #edeeef;
+  --color-tertiary: #474e60;
+  --color-secondary-fixed-dim: #c7c5d1;
+  --color-on-primary-fixed: #25005a;
+  --color-outline-variant: #ccc3d8;
+  --color-on-secondary-fixed: #1a1b23;
+  --color-surface-tint: #732ee4;
+  --color-on-background: #191c1d;
+  --color-on-primary-fixed-variant: #5a00c6;
+  --color-on-tertiary: #ffffff;
+  --color-primary: #630ed4;
+  --color-surface-variant: #e1e3e4;
+  --color-tertiary-fixed-dim: #c0c6db;
+  --color-secondary: #5d5d67;
+  --color-on-primary-container: #ede0ff;
+  --color-surface-container-highest: #e1e3e4;
+  --color-background: #f8f9fa;
+  --color-on-secondary-fixed-variant: #46464f;
+
+  --spacing-lg: 40px;
+  --spacing-base: 8px;
+  --spacing-sm: 12px;
+  --spacing-container-max: 1200px;
+  --spacing-xs: 4px;
+  --spacing-xl: 64px;
+  --spacing-md: 24px;
+  --spacing-gutter: 24px;
+
+  --font-headline-md: "Be Vietnam Pro", sans-serif;
+  --font-display-sm-mobile: "Be Vietnam Pro", sans-serif;
+  --font-display-sm: "Be Vietnam Pro", sans-serif;
+  --font-display-lg: "Be Vietnam Pro", sans-serif;
+  --font-body-sm: "Be Vietnam Pro", sans-serif;
+  --font-label-caps: "Be Vietnam Pro", sans-serif;
+  --font-body-lg: "Be Vietnam Pro", sans-serif;
+}
+
+@utility text-headline-md {
+    font-size: 20px;
+    line-height: 1.4;
+    font-weight: 600;
+    font-family: "Be Vietnam Pro", sans-serif;
+}
+@utility font-headline-md {
+    font-family: "Be Vietnam Pro", sans-serif;
+    font-weight: 600;
+}
+@utility text-display-sm-mobile {
+    font-size: 24px;
+    line-height: 1.2;
+    font-weight: 700;
+    font-family: "Be Vietnam Pro", sans-serif;
+}
+@utility font-display-sm-mobile {
+    font-family: "Be Vietnam Pro", sans-serif;
+    font-weight: 700;
+}
+@utility text-display-sm {
+    font-size: 32px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    font-family: "Be Vietnam Pro", sans-serif;
+}
+@utility font-display-sm {
+    font-family: "Be Vietnam Pro", sans-serif;
+    font-weight: 700;
+}
+@utility text-display-lg {
+    font-size: 48px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    font-family: "Be Vietnam Pro", sans-serif;
+}
+@utility font-display-lg {
+    font-family: "Be Vietnam Pro", sans-serif;
+    font-weight: 700;
+}
+@utility text-body-sm {
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 400;
+    font-family: "Be Vietnam Pro", sans-serif;
+}
+@utility text-label-caps {
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    font-family: "Be Vietnam Pro", sans-serif;
+    text-transform: uppercase;
+}
+@utility font-label-caps {
+    font-family: "Be Vietnam Pro", sans-serif;
+    font-weight: 700;
+}
+@utility text-body-lg {
+    font-size: 16px;
+    line-height: 1.6;
+    font-weight: 400;
+    font-family: "Be Vietnam Pro", sans-serif;
+}
+@utility font-body-lg {
+    font-family: "Be Vietnam Pro", sans-serif;
+    font-weight: 400;
+}
+
+.grid-bg {
+    background-size: 40px 40px;
+    background-image:
+        linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+}
+
+.soft-shadow {
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.card-border {
+    border: 1px solid #F3F4F6;
+}
+
+.glass-panel {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+}
+
+/* ─── Shadcn UI Design Tokens (Zinc Theme Light) ────────────────────────────── */
 :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 240 20% 98%;
+    --foreground: 240 10% 4%;
 
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 4%;
 
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 4%;
 
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
 
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
 
-    --radius: 0.5rem;
+    --radius: 0.6rem;
 
-    /* Custom */
-    --indigo-accent: 239 84% 67%;
-    --indigo-glow: rgba(99, 102, 241, 0.15);
+    /* Custom / Legacy Compatibility */
+    --indigo-accent: 239 84% 60%;
+    --indigo-glow: rgba(99, 102, 241, 0.08);
+    --indigo: 239 84% 60%;
+    --violet: 265 89% 65%;
+    --indigo-light: hsl(239 84% 60%);
+    --text-primary: hsl(var(--foreground));
+    --text-muted: hsl(var(--muted-foreground));
+    --success: #22c55e;
+    --danger: #ef4444;
 }
 
 /* ─── Base Styles ───────────────────────────────────────────────────────────── */
@@ -92,7 +270,7 @@ body {
     color: hsl(var(--primary-foreground));
 }
 .sh-btn-default:hover:not(:disabled) {
-    background-color: hsl(var(--primary) / 0.9);
+    background-color: hsl(var(--primary) / 0.95);
 }
 
 .sh-btn-secondary {
@@ -100,7 +278,7 @@ body {
     color: hsl(var(--secondary-foreground));
 }
 .sh-btn-secondary:hover:not(:disabled) {
-    background-color: hsl(var(--secondary) / 0.8);
+    background-color: hsl(var(--secondary) / 0.85);
 }
 
 .sh-btn-outline {
@@ -127,7 +305,7 @@ body {
     color: hsl(var(--destructive-foreground));
 }
 .sh-btn-destructive:hover:not(:disabled) {
-    background-color: hsl(var(--destructive) / 0.9);
+    background-color: hsl(var(--destructive) / 0.95);
 }
 
 /* Card */
@@ -136,11 +314,12 @@ body {
     border: 1px solid hsl(var(--border));
     background-color: hsl(var(--card));
     color: hsl(var(--card-foreground));
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: border-color 150ms ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 .sh-card:hover {
     border-color: hsl(var(--border) / 1.5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 /* Input */
@@ -200,39 +379,546 @@ body {
 }
 
 /* Animations */
-@keyframes shimmer {
-    0% {
-        background-position: -400px 0;
-    }
-    100% {
-        background-position: 400px 0;
-    }
-}
-
-.sh-skeleton {
-    border-radius: var(--radius);
-    background: linear-gradient(
-        90deg,
-        hsl(var(--muted) / 0.5) 25%,
-        hsl(var(--muted)) 50%,
-        hsl(var(--muted) / 0.5) 75%
-    );
-    background-size: 400px 100%;
-    animation: shimmer 1.4s ease-in-out infinite;
-}
-
-/* Page Transitions */
+/* ─── Page Transitions & Animations ────────────────────────────────────────── */
 .sh-fade-up {
     animation: fadeUp 250ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.anim-fade-up {
+    animation: fadeUp 350ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-in {
+    animation: fadeIn 250ms ease-out both;
+}
+
+.animate-fade-up {
+    animation: fadeUp 350ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes fadeUp {
     from {
         opacity: 0;
-        transform: translateY(8px);
+        transform: translateY(12px);
     }
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.animate-slide-in-right {
+    animation: slideInRight 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+/* ─── Authentication Layout (Premium Split-Pane & Grid Background) ─────────── */
+.auth-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #fafafb;
+    background-image: 
+        linear-gradient(to right, hsl(var(--border) / 0.45) 1px, transparent 1px),
+        linear-gradient(to bottom, hsl(var(--border) / 0.45) 1px, transparent 1px);
+    background-size: 32px 32px;
+    color: hsl(var(--foreground));
+    font-family: "Inter", "Sarabun", sans-serif;
+    position: relative;
+    padding: 60px 40px;
+}
+
+.auth-header {
+    position: absolute;
+    top: 40px;
+    left: 60px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 10;
+}
+
+.auth-logo-text {
+    font-size: 18px;
+    font-weight: 800;
+    color: hsl(262, 83%, 58%);
+    letter-spacing: -0.02em;
+}
+
+.auth-container {
+    display: flex;
+    width: 100%;
+    max-width: 1100px;
+    justify-content: space-between;
+    align-items: center;
+    gap: 80px;
+    z-index: 2;
+}
+
+.auth-brand {
+    display: flex;
+    flex-direction: column;
+    width: 48%;
+    background: transparent;
+    padding: 0;
+}
+
+.auth-form-panel {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    background: transparent;
+    padding: 0;
+}
+
+.auth-form-inner {
+    width: 100%;
+    max-width: 460px;
+    background-color: #ffffff;
+    border: 1px solid hsl(var(--border) / 0.6);
+    border-radius: 20px;
+    padding: 48px 40px;
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.04), 
+                0 1px 3px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s ease;
+}
+
+@media (max-width: 1024px) {
+    .auth-page {
+        padding: 40px 20px;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+    .auth-header {
+        position: static;
+        margin-bottom: 40px;
+        width: 100%;
+        justify-content: center;
+    }
+    .auth-container {
+        flex-direction: column;
+        gap: 40px;
+        align-items: center;
+    }
+    .auth-brand {
+        display: none;
+    }
+    .auth-form-panel {
+        width: 100%;
+    }
+    .auth-form-inner {
+        padding: 36px 24px;
+        border-radius: 16px;
+    }
+}
+
+/* Feature Items (Fallback) */
+.feature-item {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 16px;
+    border-radius: var(--radius);
+    border: 1px solid hsl(var(--border) / 0.4);
+    background: hsl(var(--card) / 0.2);
+    backdrop-filter: blur(8px);
+    transition: border-color 150ms ease, background-color 150ms ease;
+}
+.feature-item:hover {
+    border-color: hsl(var(--border) / 0.8);
+    background: hsl(var(--card) / 0.4);
+}
+
+.feature-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: hsl(var(--secondary));
+    border: 1px solid hsl(var(--border) / 0.8);
+    flex-shrink: 0;
+}
+
+/* Mock Schedule Widget */
+.mock-schedule-widget {
+    background: #ffffff;
+    border: 1px solid hsl(var(--border) / 0.6);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04);
+    margin-top: 32px;
+    width: 100%;
+    max-width: 440px;
+    border-top: 4px solid hsl(262, 83%, 58%);
+}
+
+.widget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-b: 1px solid hsl(var(--border) / 0.5);
+}
+
+.widget-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: hsl(var(--foreground));
+    letter-spacing: -0.01em;
+}
+
+.widget-badge {
+    font-size: 10px;
+    font-weight: 700;
+    color: hsl(262, 83%, 58%);
+    background: #f5f3ff;
+    border: 1px solid #e0e7ff;
+    padding: 3px 10px;
+    border-radius: 99px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.widget-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.widget-item {
+    display: flex;
+    gap: 16px;
+    padding: 14px;
+    border-radius: 8px;
+    border: 1px solid hsl(var(--border) / 0.5);
+    border-left-width: 4px;
+    background: #ffffff;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.widget-item:hover {
+    transform: translateX(2px);
+    border-color: hsl(var(--border));
+}
+
+.widget-item.peak {
+    border-left-color: hsl(262, 83%, 58%);
+    background: linear-gradient(90deg, hsl(262, 83%, 58% / 0.03), transparent);
+}
+
+.widget-item.normal {
+    border-left-color: #3b82f6;
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.03), transparent);
+}
+
+.widget-item.dip {
+    border-left-color: #f59e0b;
+    background: linear-gradient(90deg, rgba(245, 158, 11, 0.03), transparent);
+}
+
+.widget-time {
+    font-size: 11px;
+    font-weight: 700;
+    color: hsl(var(--muted-foreground));
+    font-family: monospace;
+    white-space: nowrap;
+    width: 80px;
+    padding-top: 2px;
+}
+
+.widget-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.widget-task {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: hsl(var(--foreground));
+    line-height: 1.4;
+}
+
+.widget-meta {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+/* Badges */
+.badge-high, .badge-medium, .badge-low, .badge-peak, .badge-normal, .badge-dip {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badge-high { color: #dc2626; background: #fef2f2; border: 1px solid #fee2e2; }
+.badge-medium { color: #d97706; background: #fffbeb; border: 1px solid #fef3c7; }
+.badge-low { color: #059669; background: #ecfdf5; border: 1px solid #d1fae5; }
+.badge-peak { color: hsl(262, 83%, 58%); background: #f5f3ff; border: 1px solid #e0e7ff; }
+.badge-normal { color: #2563eb; background: #eff6ff; border: 1px solid #dbeafe; }
+.badge-dip { color: #d97706; background: #fffbeb; border: 1px solid #fef3c7; }
+
+/* ─── Premium Button & Inputs ─────────────────────────────────────────────── */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 150ms ease;
+    cursor: pointer;
+    outline: none;
+    border: 1px solid transparent;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, hsl(var(--indigo-accent)), hsl(265 89% 60%));
+    color: #fff;
+    box-shadow: 0 4px 12px hsl(var(--indigo-accent) / 0.2);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, hsl(var(--indigo-accent) / 1.05), hsl(265 89% 55%));
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px hsl(var(--indigo-accent) / 0.3);
+}
+
+.btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.input {
+    width: 100%;
+    padding: 10px 14px;
+    background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: 8px;
+    color: hsl(var(--foreground));
+    font-size: 14px;
+    outline: none;
+    transition: all 150ms ease;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+}
+
+.input:focus {
+    border-color: hsl(var(--indigo-accent) / 0.6);
+    box-shadow: 0 0 0 3px hsl(var(--indigo-accent) / 0.12);
+    background-color: hsl(var(--card));
+}
+
+.input::placeholder {
+    color: hsl(var(--muted-foreground));
+}
+
+.input-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: hsl(var(--foreground) / 0.8);
+    margin-bottom: 6px;
+}
+
+.input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.input-group .input {
+    padding-left: 40px;
+}
+
+.input-icon {
+    position: absolute;
+    left: 14px;
+    color: hsl(var(--muted-foreground));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+/* ─── Premium UI Utilities ────────────────────────────────────────────────── */
+.grad-text {
+    background: linear-gradient(135deg, hsl(var(--indigo-accent)), hsl(265 89% 60%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.section-label {
+    font-size: 11px;
+    font-weight: 750;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: hsl(var(--indigo-accent));
+}
+
+.progress-track {
+    width: 100%;
+    height: 4px;
+    background: hsl(var(--secondary));
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid hsl(var(--muted) / 0.5);
+    border-top-color: hsl(var(--foreground));
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* ─── Premium Glassmorphism Styles ────────────────────────────────────────── */
+.glass {
+    background: rgba(255, 255, 255, 0.42);
+    backdrop-filter: blur(20px) saturate(190%);
+    -webkit-backdrop-filter: blur(20px) saturate(190%);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 16px;
+    box-shadow: 
+        0 8px 32px 0 rgba(31, 38, 135, 0.04),
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.7);
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass:hover {
+    background: rgba(255, 255, 255, 0.52);
+    border-color: rgba(255, 255, 255, 0.65);
+    box-shadow: 
+        0 12px 40px 0 rgba(31, 38, 135, 0.07),
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Overriding default card layout with glass */
+.sh-card {
+    background: rgba(255, 255, 255, 0.42) !important;
+    backdrop-filter: blur(20px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(190%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.45) !important;
+    border-radius: 16px !important;
+    box-shadow: 
+        0 8px 32px 0 rgba(31, 38, 135, 0.04),
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.7) !important;
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sh-card:hover {
+    background: rgba(255, 255, 255, 0.52) !important;
+    border-color: rgba(255, 255, 255, 0.65) !important;
+    box-shadow: 
+        0 12px 40px 0 rgba(31, 38, 135, 0.07),
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+.glass-sidebar {
+    background: rgba(255, 255, 255, 0.35) !important;
+    backdrop-filter: blur(24px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 4px 0 32px 0 rgba(31, 38, 135, 0.02) !important;
+}
+
+.glass-modal {
+    background: rgba(255, 255, 255, 0.65) !important;
+    backdrop-filter: blur(30px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 24px 64px -12px rgba(31, 38, 135, 0.12),
+                inset 0 1px 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Float Animations for Ambient Blobs */
+@keyframes float-blob-1 {
+    0% {
+        transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+        transform: translate(40px, -60px) scale(1.15);
+    }
+    66% {
+        transform: translate(-30px, 30px) scale(0.9);
+    }
+    100% {
+        transform: translate(0px, 0px) scale(1);
+    }
+}
+
+@keyframes float-blob-2 {
+    0% {
+        transform: translate(0px, 0px) scale(1);
+    }
+    50% {
+        transform: translate(-50px, 50px) scale(1.1);
+    }
+    100% {
+        transform: translate(0px, 0px) scale(1);
+    }
+}
+
+@keyframes float-blob-3 {
+    0% {
+        transform: translate(0px, 0px) scale(1);
+    }
+    50% {
+        transform: translate(30px, 40px) scale(0.95);
+    }
+    100% {
+        transform: translate(0px, 0px) scale(1);
+    }
+}
+
+.animate-blob-1 {
+    animation: float-blob-1 25s infinite alternate ease-in-out;
+}
+
+.animate-blob-2 {
+    animation: float-blob-2 20s infinite alternate ease-in-out;
+}
+
+.animate-blob-3 {
+    animation: float-blob-3 28s infinite alternate ease-in-out;
+}
+
+

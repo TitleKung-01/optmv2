@@ -59,5 +59,18 @@ export function useSchedule() {
     }
   }, []);
 
-  return { schedules, loading, error, fetchSchedules, triggerSchedule, reorderSchedules, clearDay };
+  const updateScheduleTime = useCallback(async (id: string, startTime: string, endTime: string): Promise<void> => {
+    setLoading(true);
+    setError(null);
+    try {
+      await api.updateSchedule(id, { start_time: startTime, end_time: endTime });
+    } catch (e) {
+      setError((e as Error).message);
+      throw e;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return { schedules, loading, error, fetchSchedules, triggerSchedule, reorderSchedules, clearDay, updateScheduleTime };
 }

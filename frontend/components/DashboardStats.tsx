@@ -1,227 +1,144 @@
 "use client";
 
 import type { Task } from "@/lib/types";
-import {
-  LayoutDashboard,
-  Clock,
-  Calendar,
-  CheckCircle2,
-  AlertCircle,
-  Flame,
-} from "lucide-react";
+import { TrendingUp, CheckCircle2 } from "lucide-react";
+import { useState } from "react";
 
 interface Props {
   tasks: Task[];
 }
 
-function computeStats(tasks: Task[]) {
-  const now = Date.now();
-  const pending = tasks.filter((t) => t.status === "Pending").length;
-  const scheduled = tasks.filter((t) => t.status === "Scheduled").length;
-  const completed = tasks.filter((t) => t.status === "Completed").length;
-  const overdue = tasks.filter(
-    (t) =>
-      t.status !== "Completed" &&
-      t.deadline &&
-      new Date(t.deadline).getTime() < now,
-  ).length;
+export default function DashboardStats({ tasks }: Props) {
+  const [selectedWeek, setSelectedWeek] = useState("This Week");
 
-  const weekly: number[] = Array(7).fill(0);
+  // Compute weekly statistics
+  const completedCounts: number[] = Array(7).fill(0);
+  const totalCounts: number[] = Array(7).fill(0);
   const today = new Date();
+
   tasks.forEach((t) => {
-    if (t.status !== "Completed") return;
+    // Days ago calculation based on created_at date
     const daysAgo = Math.floor(
       (today.getTime() - new Date(t.created_at).getTime()) / 86_400_000,
     );
-    if (daysAgo >= 0 && daysAgo < 7) weekly[6 - daysAgo]++;
+    if (daysAgo >= 0 && daysAgo < 7) {
+      const index = 6 - daysAgo;
+      totalCounts[index]++;
+      if (t.status === "Completed") {
+        completedCounts[index]++;
+      }
+    }
   });
 
-  let streak = 0;
-  for (let i = 6; i >= 0; i--) {
-    if (weekly[i] > 0) streak++;
-    else break;
-  }
+  const maxVal = Math.max(...totalCounts, 4); // Min scale height of 4 tasks
+  const step = Math.ceil(maxVal / 4);
+  const scaleMax = step * 4;
+  const yAxisLabels = [scaleMax, step * 3, step * 2, step * 1, 0];
 
-  return {
-    total: tasks.length,
-    pending,
-    scheduled,
-    completed,
-    overdue,
-    streak,
-    weekly,
-  };
-}
+  // Generate weekday letters dynamically (M, T, W, T, F, S, S)
+  const dayData = Array(7)
+    .fill(0)
+    .map((_, i) => {
+      const d = new Date();
+      d.setDate(today.getDate() - (6 - i));
+      const label = d.toLocaleDateString("en-US", { weekday: "narrow" });
+      const isToday = i === 6;
+      return {
+        label,
+        isToday,
+        total: totalCounts[i],
+        completed: completedCounts[i],
+      };
+    });
 
-const DAY_LABELS = ["6d", "5d", "4d", "3d", "2d", "เมื่อวาน", "วันนี้"];
-
-export default function DashboardStats({ tasks }: Props) {
-  const s = computeStats(tasks);
-  const maxBar = Math.max(...s.weekly, 1);
-
-  const cards = [
-    {
-      label: "ทั้งหมด",
-      value: s.total,
-      icon: LayoutDashboard,
-      color: "text-indigo-400",
-      glowBg: "bg-indigo-500/10 border-indigo-500/20",
-    },
-    {
-      label: "รอดำเนินการ",
-      value: s.pending,
-      icon: Clock,
-      color: "text-amber-400",
-      glowBg: "bg-amber-500/10 border-amber-500/20",
-    },
-    {
-      label: "จัดตาราง",
-      value: s.scheduled,
-      icon: Calendar,
-      color: "text-sky-400",
-      glowBg: "bg-sky-500/10 border-sky-500/20",
-    },
-    {
-      label: "เสร็จแล้ว",
-      value: s.completed,
-      icon: CheckCircle2,
-      color: "text-emerald-400",
-      glowBg: "bg-emerald-500/10 border-emerald-500/20",
-    },
-    {
-      label: "เกินกำหนด",
-      value: s.overdue,
-      icon: AlertCircle,
-      color: s.overdue > 0 ? "text-rose-400" : "text-zinc-500",
-      glowBg:
-        s.overdue > 0
-          ? "bg-rose-500/10 border-rose-500/20"
-          : "bg-zinc-800/20 border-zinc-800/10",
-    },
-    {
-      label: "Streak",
-      value: s.streak,
-      icon: Flame,
-      color: s.streak > 0 ? "text-orange-500" : "text-zinc-500",
-      glowBg:
-        s.streak > 0
-          ? "bg-orange-500/10 border-orange-500/20"
-          : "bg-zinc-800/20 border-zinc-800/10",
-    },
-  ];
+  const totalCompletedThisWeek = completedCounts.reduce((a, b) => a + b, 0);
 
   return (
-    <div className="flex flex-col gap-5 w-full">
-      {/* Stat grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3.5">
-        {cards.map((c, i) => {
-          const Icon = c.icon;
-          return (
-            <div
-              key={i}
-              className="sh-card rounded-xl p-4 bg-zinc-950/45 border border-zinc-800/70 shadow-sm flex items-center gap-3.5 hover:bg-zinc-900/40 transition-all duration-300 group sh-fade-up"
-              style={{ animationDelay: `${i * 50}ms` }}
-            >
-              <div
-                className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 ${c.glowBg}`}
-              >
-                <Icon className={`w-5 h-5 ${c.color}`} />
-              </div>
-              <div className="min-w-0">
-                <div
-                  className={`text-2xl font-extrabold tracking-tight ${c.color} leading-none mb-1`}
-                >
-                  {c.value}
-                </div>
-                <div className="text-xs font-semibold text-zinc-400 truncate">
-                  {c.label}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Weekly Completed Chart */}
-      <div
-        className="sh-card rounded-xl p-5 bg-zinc-950/45 border border-zinc-800/70 shadow-md flex flex-col gap-5 sh-fade-up"
-        style={{ animationDelay: "300ms" }}
-      >
-        {/* Chart Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-              <CheckCircle2 className="w-4 h-4 text-indigo-400" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-zinc-200">
-                งานที่เสร็จ 7 วันที่ผ่านมา
-              </h3>
-              <p className="text-[11px] text-zinc-500 font-medium">
-                สถิติความคืบหน้าการทำงานรายวัน
-              </p>
-            </div>
+    <div className="w-full flex flex-col gap-6 p-6 bg-transparent">
+      {/* Chart Header */}
+      <div className="flex justify-between items-center mb-2">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 border border-indigo-100/30 flex items-center justify-center shadow-[0_4px_12px_rgba(79,70,229,0.04)]">
+            <CheckCircle2 className="w-5 h-5 stroke-[2]" />
           </div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            รวม {s.weekly.reduce((a, b) => a + b, 0)} งาน
+          <div>
+            <h4 className="text-base font-extrabold text-zinc-100 leading-snug">Weekly Progress</h4>
+            <p className="text-xs text-zinc-300 font-medium">Tasks completed vs planned</p>
           </div>
         </div>
+        <div className="flex items-center gap-3">
+          {/* Total badge */}
+          <span className="bg-emerald-50/80 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold border border-emerald-100/60 flex items-center gap-1 shadow-sm">
+            <TrendingUp className="w-3.5 h-3.5" /> Total {totalCompletedThisWeek} Completed
+          </span>
+          <select
+            value={selectedWeek}
+            onChange={(e) => setSelectedWeek(e.target.value)}
+            className="bg-white/40 backdrop-blur-md border border-white/60 text-xs font-bold text-zinc-100 rounded-xl py-1.5 pl-3 pr-8 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer shadow-sm hover:bg-white/70 transition-all"
+          >
+            <option>This Week</option>
+            <option>Last Week</option>
+          </select>
+        </div>
+      </div>
 
-        {/* Chart Bars */}
-        <div className="flex items-end justify-between gap-3 h-32 md:h-36 mt-4 px-2">
-          {s.weekly.map((count, i) => {
-            const isToday = i === 6;
-            const heightPercent = count === 0 ? 5 : (count / maxBar) * 100;
+      {/* Faux Chart Container */}
+      <div className="relative min-h-[260px] flex items-end gap-4 mt-6">
+        {/* Y-axis labels */}
+        <div className="absolute left-0 top-0 bottom-8 w-8 flex flex-col justify-between text-xs font-extrabold text-zinc-300 pb-2.5">
+          {yAxisLabels.map((val, idx) => (
+            <span key={idx}>{val}</span>
+          ))}
+        </div>
+
+        {/* Grid lines */}
+        <div className="absolute left-8 right-0 top-2 bottom-9 flex flex-col justify-between pointer-events-none">
+          {Array(5)
+            .fill(0)
+            .map((_, idx) => (
+              <div key={idx} className="w-full border-t border-zinc-200/20" />
+            ))}
+        </div>
+
+        {/* Bars */}
+        <div className="flex-1 flex justify-around items-end h-full pl-8 pb-9 relative z-10">
+          {dayData.map((day, i) => {
+            const hasTasks = day.total > 0;
+            // Planned/total height is percentage of the scaleMax
+            const plannedHeight = hasTasks ? (day.total / scaleMax) * 100 : 5;
+            // Completed is percentage of planned/total tasks
+            const completedHeight = hasTasks ? (day.completed / day.total) * 100 : 0;
 
             return (
-              <div
-                key={i}
-                className="flex-1 flex flex-col items-center gap-2.5 group/bar cursor-pointer animate-[fadeUp_300ms_ease_both]"
-                style={{ animationDelay: `${400 + i * 40}ms` }}
-              >
-                {/* Value Label above Bar */}
-                <span
-                  className={`text-xs font-bold tracking-tight select-none transition-all duration-300 ${
-                    count > 0
-                      ? isToday
-                        ? "text-indigo-400 font-extrabold scale-110 drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]"
-                        : "text-zinc-400 group-hover/bar:text-zinc-200"
-                      : "text-transparent group-hover/bar:text-zinc-600 text-[10px]"
-                  }`}
+              <div key={i} className="w-full max-w-[32px] flex flex-col items-center gap-3 group select-none">
+                {/* Bar Stack */}
+                <div
+                  style={{ height: `${plannedHeight}%` }}
+                  className={`w-full bg-white/40 border border-white/50 rounded-t-md relative group-hover:bg-white/60 transition-colors duration-200 min-h-[12px]`}
                 >
-                  {count > 0 ? count : "0"}
-                </span>
-
-                {/* Bar Track & Fill */}
-                <div className="w-full flex-1 flex items-end justify-center min-h-10">
-                  <div
-                    style={{ height: `${heightPercent}%` }}
-                    className={`w-full max-w-9 rounded-t-md transition-all duration-500 ease-out relative ${
-                      isToday
-                        ? "bg-linear-to-t from-violet-600 via-indigo-500 to-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.5)] border-t border-indigo-300/30 group-hover/bar:brightness-110"
-                        : count > 0
-                          ? "bg-indigo-500/20 group-hover/bar:bg-indigo-500/40 border-t border-indigo-500/10 group-hover/bar:scale-y-[1.03]"
-                          : "bg-zinc-800/30 group-hover/bar:bg-zinc-800/60 border-t border-zinc-700/20"
-                    }`}
-                  >
-                    {/* Glowing today indicator dot at the top of the bar */}
-                    {isToday && (
-                      <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_#fff,0_0_15px_rgba(99,102,241,1)] animate-pulse" />
-                    )}
+                  {/* Completed Fill */}
+                  {day.completed > 0 && (
+                    <div
+                      style={{ height: `${completedHeight}%` }}
+                      className={`absolute bottom-0 w-full bg-gradient-to-t from-indigo-600 via-indigo-500 to-violet-400 rounded-t-md group-hover:brightness-105 transition-all duration-300 ${
+                        day.isToday ? 'shadow-[0_2px_12px_rgba(79,70,229,0.35)]' : 'shadow-[0_2px_8px_rgba(79,70,229,0.15)]'
+                      }`}
+                    />
+                  )}
+                  {/* Floating tooltip on hover */}
+                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-zinc-900/90 backdrop-blur-md text-white text-[10px] font-bold py-1 px-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-30 shadow-md">
+                    {day.completed} / {day.total} Done
                   </div>
                 </div>
 
-                {/* Day Label underneath */}
-                <div
-                  className={`text-xs font-semibold tracking-wide transition-all ${
-                    isToday
-                      ? "text-indigo-400 scale-105 font-bold"
-                      : "text-zinc-500 group-hover/bar:text-zinc-300"
+                {/* Day label */}
+                <span
+                  className={`text-xs font-bold tracking-wide transition-colors ${
+                    day.isToday ? "text-indigo-600 font-black scale-105" : "text-zinc-300 group-hover:text-zinc-100"
                   }`}
                 >
-                  {DAY_LABELS[i]}
-                </div>
+                  {day.label}
+                </span>
               </div>
             );
           })}

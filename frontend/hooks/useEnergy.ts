@@ -13,7 +13,7 @@ function getCurrentMinutes(): number {
   return now.getHours() * 60 + now.getMinutes();
 }
 
-export function useEnergy(profile: UserProfile | null): EnergyState {
+export function useEnergy(profile: UserProfile | null | undefined): EnergyState {
   const [energy, setEnergy] = useState<EnergyState>({
     level: 'normal',
     percentage: 60,

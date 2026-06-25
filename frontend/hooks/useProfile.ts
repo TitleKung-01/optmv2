@@ -5,7 +5,7 @@ import type { UserProfile } from '@/lib/types';
 import * as api from '@/lib/api';
 
 export function useProfile() {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

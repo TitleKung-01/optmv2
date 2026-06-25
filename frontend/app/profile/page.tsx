@@ -5,33 +5,12 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import Sidebar from "@/components/Sidebar";
+import OnboardingModal from "@/components/OnboardingModal";
+import UserInfoCard from "@/components/UserInfoCard";
+import ChronotypeSelector from "@/components/ChronotypeSelector";
+import TimeIntervalCard from "@/components/TimeIntervalCard";
+import LineConfigCard from "@/components/LineConfigCard";
 import type { Chronotype } from "@/lib/types";
-
-const CHRONOTYPES: {
-  key: Chronotype;
-  label: string;
-  icon: string;
-  desc: string;
-}[] = [
-  {
-    key: "Morning Lark",
-    label: "Morning Lark",
-    icon: "🐦",
-    desc: "ตื่นเช้า มีพลังสูงสุดช่วงเช้า",
-  },
-  {
-    key: "Third Bird",
-    label: "Third Bird",
-    icon: "🦅",
-    desc: "กลางๆ ระหว่างเช้าและเย็น",
-  },
-  {
-    key: "Night Owl",
-    label: "Night Owl",
-    icon: "🦉",
-    desc: "มีพลังสูงสุดช่วงกลางคืน",
-  },
-];
 
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
@@ -47,6 +26,7 @@ export default function ProfilePage() {
   const [lineUserId, setLineUserId] = useState("");
   const [lineSaved, setLineSaved] = useState(false);
   const [error, setError] = useState("");
+  const [showQuizModal, setShowQuizModal] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) router.replace("/login");
@@ -138,341 +118,106 @@ export default function ProfilePage() {
     );
 
   return (
-    <div className="page-shell">
-      <Sidebar />
-      <main className="page-content">
-        <div className="page-header">
-          <h1 className="page-title">◉ Profile</h1>
-          <p className="page-subtitle">
-            ตั้งค่า Chronotype และช่วงเวลา Peak/Dip
-          </p>
-        </div>
-
-        <div
-          style={{
-            maxWidth: 640,
-            display: "flex",
-            flexDirection: "column",
-            gap: 24,
-          }}
-        >
-          {/* User info */}
-          <div
-            className="glass"
-            style={{
-              padding: "20px 24px",
-              display: "flex",
-              gap: 16,
-              alignItems: "center",
-            }}
-          >
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: "50%",
-                flexShrink: 0,
-                background:
-                  "linear-gradient(135deg, var(--indigo), var(--violet))",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 22,
-                fontWeight: 700,
-                color: "#fff",
-              }}
-            >
-              {user.email?.[0].toUpperCase()}
-            </div>
+    <>
+      <div className="flex min-h-screen bg-transparent">
+        <Sidebar />
+        <main className="flex-1 min-w-0 p-8 overflow-y-auto max-w-4xl mx-auto sh-fade-up">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-6 border-b border-white/45">
             <div>
-              <div style={{ fontSize: 16, fontWeight: 600 }}>{user.email}</div>
-              <div
-                style={{
-                  fontSize: 12,
-                  color: "var(--text-muted)",
-                  marginTop: 2,
-                }}
-              >
-                สมาชิกตั้งแต่{" "}
-                {new Date(user.created_at).toLocaleDateString("th-TH")}
-              </div>
+              <h1 className="text-3xl font-extrabold tracking-tight text-zinc-100 flex items-center gap-2">
+                Profile
+              </h1>
+              <p className="text-sm text-zinc-300 font-semibold mt-1">
+                ตั้งค่า Chronotype และช่วงเวลา Peak/Dip
+              </p>
             </div>
           </div>
 
-          {/* Chronotype */}
-          <div className="glass" style={{ padding: "24px" }}>
-            <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>
-              🦅 Chronotype
-            </div>
-            <div
-              style={{
-                fontSize: 13,
-                color: "var(--text-muted)",
-                marginBottom: 18,
-              }}
-            >
-              เลือกประเภทนาฬิกาชีวภาพของคุณ เพื่อให้ระบบจัดตารางได้เหมาะสม
-            </div>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              {CHRONOTYPES.map((c) => {
-                const active = chronotype === c.key;
-                return (
-                  <button
-                    key={c.key}
-                    onClick={() => handleChronotype(c.key)}
-                    style={{
-                      flex: 1,
-                      minWidth: 160,
-                      padding: "16px",
-                      borderRadius: "var(--radius-md)",
-                      border: `2px solid ${active ? "var(--indigo)" : "var(--border)"}`,
-                      background: active
-                        ? "rgba(99,102,241,0.1)"
-                        : "transparent",
-                      cursor: "pointer",
-                      textAlign: "left",
-                      transition: "all 0.2s ease",
-                    }}
-                  >
-                    <div style={{ fontSize: 28, marginBottom: 8 }}>
-                      {c.icon}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        color: active
-                          ? "var(--indigo-light)"
-                          : "var(--text-primary)",
-                        marginBottom: 4,
-                      }}
-                    >
-                      {c.label}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 12,
-                        color: "var(--text-muted)",
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      {c.desc}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <div className="flex flex-col gap-6 max-w-2xl">
+            {/* User info */}
+            <UserInfoCard user={user} />
 
-          {/* Peak Time */}
-          <div className="glass" style={{ padding: "24px" }}>
-            <div
-              style={{
-                fontSize: 15,
-                fontWeight: 700,
-                marginBottom: 4,
-                color: "var(--success)",
-              }}
-            >
-              🔥 Peak Time
-            </div>
-            <div
-              style={{
-                fontSize: 13,
-                color: "var(--text-muted)",
-                marginBottom: 18,
-              }}
-            >
-              ช่วงเวลาที่มีพลังงานและสมาธิสูงสุด — งานยากจะถูกจัดในช่วงนี้
-            </div>
-            <div className="grid-2">
-              <div>
-                <label className="input-label">เริ่ม</label>
-                <input
-                  type="time"
-                  className="input"
-                  value={peakStart}
-                  onChange={(e) => setPeakStart(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="input-label">สิ้นสุด</label>
-                <input
-                  type="time"
-                  className="input"
-                  value={peakEnd}
-                  onChange={(e) => setPeakEnd(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
+            {/* Chronotype */}
+            <ChronotypeSelector
+              chronotype={chronotype}
+              onSelectChronotype={handleChronotype}
+              onOpenQuiz={() => setShowQuizModal(true)}
+            />
 
-          {/* Dip Time */}
-          <div className="glass" style={{ padding: "24px" }}>
-            <div
-              style={{
-                fontSize: 15,
-                fontWeight: 700,
-                marginBottom: 4,
-                color: "var(--danger)",
-              }}
-            >
-              😴 Dip Time
-            </div>
-            <div
-              style={{
-                fontSize: 13,
-                color: "var(--text-muted)",
-                marginBottom: 18,
-              }}
-            >
-              ช่วงที่พลังงานต่ำ — งานง่ายหรือพักเบรกจะถูกจัดในช่วงนี้
-              (ไม่บังคับ)
-            </div>
-            <div className="grid-2">
-              <div>
-                <label className="input-label">เริ่ม</label>
-                <input
-                  type="time"
-                  className="input"
-                  value={dipStart}
-                  onChange={(e) => setDipStart(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="input-label">สิ้นสุด</label>
-                <input
-                  type="time"
-                  className="input"
-                  value={dipEnd}
-                  onChange={(e) => setDipEnd(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
+            {/* Peak Time */}
+            <TimeIntervalCard
+              title="🔥 Peak Time"
+              description="ช่วงเวลาที่มีพลังงานและสมาธิสูงสุด — งานยากจะถูกจัดในช่วงนี้"
+              startValue={peakStart}
+              endValue={peakEnd}
+              onStartChange={setPeakStart}
+              onEndChange={setPeakEnd}
+              themeColorClass="text-emerald-400"
+            />
 
-          {/* LINE Notification */}
-          <div className="glass" style={{ padding: "24px" }}>
-            <div
-              style={{
-                fontSize: 15,
-                fontWeight: 700,
-                marginBottom: 4,
-                color: "#06c755",
-              }}
-            >
-              💬 LINE Notification
-            </div>
-            <div
-              style={{
-                fontSize: 13,
-                color: "var(--text-muted)",
-                marginBottom: 18,
-                lineHeight: 1.6,
-              }}
-            >
-              รับแจ้งเตือนงานผ่าน LINE เมื่องานจะเริ่มใน 5 นาที
-            </div>
+            {/* Dip Time */}
+            <TimeIntervalCard
+              title="😴 Dip Time"
+              description="ช่วงที่พลังงานต่ำ — งานง่ายหรือพักเบรกจะถูกจัดในช่วงนี้ (ไม่บังคับ)"
+              startValue={dipStart}
+              endValue={dipEnd}
+              onStartChange={setDipStart}
+              onEndChange={setDipEnd}
+              themeColorClass="text-amber-500"
+            />
 
-            <div style={{ marginBottom: 16 }}>
-              <label className="input-label">LINE User ID</label>
-              <input
-                type="text"
-                className="input"
-                placeholder="Uxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                value={lineUserId}
-                onChange={(e) => setLineUserId(e.target.value)}
-              />
-              <div
-                style={{
-                  fontSize: 11,
-                  color: "var(--text-muted)",
-                  marginTop: 6,
-                  lineHeight: 1.5,
-                }}
-              >
-                วิธีหา LINE User ID: ส่งข้อความใดก็ได้ไปที่บอทของเรา
-                แล้วบอทจะตอบกลับ ID ให้ทันที
+            {/* LINE Notification */}
+            <LineConfigCard
+              lineUserId={lineUserId}
+              onLineUserIdChange={setLineUserId}
+              onSave={handleSaveLine}
+              isSaving={loading}
+              isSavedSuccess={lineSaved}
+            />
+
+            {/* Error / Success */}
+            {error && (
+              <div className="p-4 rounded-lg bg-rose-500/10 border border-rose-500/20 text-sm font-semibold text-rose-400">
+                ⚠ {error}
               </div>
-            </div>
-
-            {lineSaved && (
-              <div
-                style={{
-                  padding: "10px 14px",
-                  borderRadius: "var(--radius-sm)",
-                  marginBottom: 12,
-                  background: "rgba(6,199,85,0.1)",
-                  border: "1px solid rgba(6,199,85,0.25)",
-                  fontSize: 13,
-                  color: "#06c755",
-                }}
-              >
-                ✓ บันทึก LINE User ID แล้ว
+            )}
+            {saved && (
+              <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-sm font-semibold text-emerald-400">
+                ✓ บันทึกเรียบร้อยแล้ว
               </div>
             )}
 
             <button
-              className="btn btn-primary"
-              onClick={handleSaveLine}
+              id="save-profile-btn"
+              className="sh-btn sh-btn-default px-8 py-3 text-sm self-start"
+              onClick={handleSave}
               disabled={loading}
-              style={{ padding: "10px 22px", fontSize: 14 }}
             >
-              💬 บันทึก LINE User ID
+              {loading ? (
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin mr-1.5" />
+                  กำลังบันทึก...
+                </>
+              ) : (
+                "✓ บันทึกโปรไฟล์"
+              )}
             </button>
           </div>
+        </main>
+      </div>
 
-          {/* Error / Success */}
-          {error && (
-            <div
-              style={{
-                padding: "12px 16px",
-                borderRadius: "var(--radius-sm)",
-                background: "rgba(244,63,94,0.1)",
-                border: "1px solid rgba(244,63,94,0.2)",
-                fontSize: 13,
-                color: "var(--danger)",
-              }}
-            >
-              ⚠ {error}
-            </div>
-          )}
-          {saved && (
-            <div
-              style={{
-                padding: "12px 16px",
-                borderRadius: "var(--radius-sm)",
-                background: "rgba(34,211,164,0.1)",
-                border: "1px solid rgba(34,211,164,0.2)",
-                fontSize: 13,
-                color: "var(--success)",
-              }}
-            >
-              ✓ บันทึกเรียบร้อยแล้ว
-            </div>
-          )}
-
-          <button
-            id="save-profile-btn"
-            className="btn btn-primary"
-            onClick={handleSave}
-            disabled={loading}
-            style={{
-              alignSelf: "flex-start",
-              padding: "12px 28px",
-              fontSize: 15,
-            }}
-          >
-            {loading ? (
-              <>
-                <span className="spinner" /> กำลังบันทึก...
-              </>
-            ) : (
-              "✓ บันทึกโปรไฟล์"
-            )}
-          </button>
-        </div>
-      </main>
-    </div>
+      {showQuizModal && (
+        <OnboardingModal
+          onSave={saveProfile}
+          onComplete={() => {
+            fetchProfile();
+            setShowQuizModal(false);
+          }}
+          mode="profile"
+          onClose={() => setShowQuizModal(false)}
+        />
+      )}
+    </>
   );
 }

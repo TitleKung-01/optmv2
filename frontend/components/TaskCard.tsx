@@ -78,23 +78,23 @@ export default function TaskCard({
 
   return (
     <div
-      className={`sh-card relative p-4 flex flex-col gap-3.5 overflow-hidden transition-all duration-200 anim-fade-up ${
+      className={`sh-card relative p-4 flex flex-col gap-3.5 overflow-hidden transition-all duration-300 anim-fade-up ${
         done
-          ? "opacity-55 hover:opacity-85"
-          : "hover:border-zinc-700/80 hover:shadow-md"
+          ? "opacity-60 hover:opacity-90"
+          : "hover:border-indigo-500/20 hover:scale-102 hover:shadow-[0_12px_32px_rgba(99,102,241,0.06)]"
       }`}
     >
       {/* Subtle left-side border priority indicator */}
       {task.priority > 1 && (
         <div
-          className={`absolute left-0 top-0 bottom-0 w-0.75 rounded-l-(--radius) ${
+          className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-(--radius) ${
             task.priority >= 5
-              ? "bg-linear-to-b from-rose-500 to-orange-500"
+              ? "bg-gradient-to-b from-rose-500 to-orange-500"
               : task.priority === 4
-                ? "bg-linear-to-b from-orange-500 to-amber-500"
+                ? "bg-gradient-to-b from-orange-500 to-amber-500"
                 : task.priority === 3
-                  ? "bg-linear-to-b from-indigo-500 to-purple-500"
-                  : "bg-zinc-700"
+                  ? "bg-gradient-to-b from-indigo-500 to-purple-500"
+                  : "bg-zinc-400"
           }`}
         />
       )}
@@ -105,22 +105,22 @@ export default function TaskCard({
         <button
           onClick={() => onComplete(task.id)}
           title={done ? "ยกเลิกทำเสร็จ" : "ทำเสร็จแล้ว"}
-          className={`h-5 w-5 rounded border flex items-center justify-center shrink-0 mt-0.5 transition-all duration-200 cursor-pointer ${
+          className={`h-5 w-5 rounded-lg border flex items-center justify-center shrink-0 mt-0.5 transition-all duration-200 cursor-pointer ${
             done
-              ? "bg-zinc-100 border-zinc-100 text-zinc-900"
-              : "border-zinc-700 hover:border-zinc-500 bg-transparent text-transparent"
+              ? "bg-indigo-600 border-indigo-600 text-white shadow-sm"
+              : "border-zinc-300 hover:border-indigo-600 bg-white"
           }`}
         >
           <Check
-            className={`h-3.5 w-3.5 stroke-[3px] ${done ? "block" : "hidden"}`}
+            className={`h-3.5 w-3.5 stroke-[3.5px] ${done ? "block" : "hidden"}`}
           />
         </button>
 
         {/* Title and Badges container */}
         <div className="flex-1 min-w-0 flex flex-col gap-1.5">
           <h3
-            className={`text-sm font-semibold leading-snug transition-all ${
-              done ? "text-zinc-500 line-through" : "text-zinc-100"
+            className={`text-sm font-bold leading-snug transition-all ${
+              done ? "text-zinc-400 line-through" : "text-zinc-100"
             }`}
           >
             {task.title}
@@ -129,20 +129,20 @@ export default function TaskCard({
           {/* Badges Layout */}
           <div className="flex flex-wrap gap-1.5 items-center mt-1">
             {/* Difficulty Badge */}
-            <span className="inline-flex items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-950/40 px-2 py-0.5 text-[11px] text-zinc-300 font-medium">
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/50 bg-white/45 px-2 py-0.5 text-[11px] text-zinc-200 font-bold shadow-xs">
               <span className={`h-1.5 w-1.5 rounded-full ${diff.color}`} />
               {diff.label}
             </span>
 
             {/* Status Badge */}
-            <span className="inline-flex items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-950/40 px-2 py-0.5 text-[11px] text-zinc-300 font-medium">
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/50 bg-white/45 px-2 py-0.5 text-[11px] text-zinc-200 font-bold shadow-xs">
               <span className={`h-1.5 w-1.5 rounded-full ${status.color}`} />
               {status.label}
             </span>
 
             {/* Category Badge */}
             {task.category && (
-              <span className="inline-flex items-center gap-1.5 rounded-md border border-zinc-800 bg-indigo-950/20 px-2 py-0.5 text-[11px] text-indigo-300 font-medium">
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-100/30 bg-indigo-50/70 px-2 py-0.5 text-[11px] text-indigo-600 font-bold shadow-xs">
                 {task.category}
               </span>
             )}
@@ -150,12 +150,12 @@ export default function TaskCard({
             {/* Priority Numeric Badge */}
             {task.priority > 1 && (
               <span
-                className={`inline-flex items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-950/40 px-2 py-0.5 text-[11px] font-medium ${
+                className={`inline-flex items-center gap-1.5 rounded-lg border border-white/50 bg-white/45 px-2 py-0.5 text-[11px] font-bold shadow-xs ${
                   task.priority >= 4
-                    ? "text-rose-400"
+                    ? "text-rose-600"
                     : task.priority === 3
-                      ? "text-amber-400"
-                      : "text-zinc-400"
+                      ? "text-amber-600"
+                      : "text-zinc-200"
                 }`}
               >
                 ความสำคัญ: {task.priority}
@@ -165,7 +165,7 @@ export default function TaskCard({
             {/* Recurrence Badge */}
             {task.recurrence !== "none" && (
               <span
-                className="inline-flex items-center gap-1 rounded-md border border-zinc-800 bg-indigo-950/10 px-2 py-0.5 text-[11px] text-indigo-400 font-medium"
+                className="inline-flex items-center gap-1 rounded-lg border border-indigo-100/30 bg-indigo-50/70 px-2 py-0.5 text-[11px] text-indigo-600 font-bold shadow-xs"
                 title={`ซ้ำ: ${task.recurrence}`}
               >
                 <Repeat className="h-3 w-3 shrink-0" />
@@ -179,14 +179,14 @@ export default function TaskCard({
         <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={() => onEdit(task)}
-            className="h-7 w-7 inline-flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/80 transition-colors cursor-pointer"
+            className="h-7 w-7 inline-flex items-center justify-center rounded-md text-zinc-400 hover:text-indigo-600 hover:bg-white/40 transition-colors cursor-pointer"
             title="แก้ไข"
           >
             <Edit className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={() => onDelete(task.id)}
-            className="h-7 w-7 inline-flex items-center justify-center rounded-md text-zinc-400 hover:text-rose-400 hover:bg-rose-950/20 transition-colors cursor-pointer"
+            className="h-7 w-7 inline-flex items-center justify-center rounded-md text-zinc-400 hover:text-rose-600 hover:bg-rose-50/50 transition-colors cursor-pointer"
             title="ลบ"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -195,8 +195,8 @@ export default function TaskCard({
       </div>
 
       {/* Row 2: duration & deadline meta */}
-      <div className="flex items-center justify-between pl-8 border-t border-zinc-800/40 pt-2.5 mt-0.5">
-        <span className="inline-flex items-center gap-1.5 text-xs text-zinc-400">
+      <div className="flex items-center justify-between pl-8 border-t border-white/50 pt-2.5 mt-0.5">
+        <span className="inline-flex items-center gap-1.5 text-xs text-zinc-400 font-medium">
           <Clock className="h-3.5 w-3.5" />
           {task.estimated_duration} นาที
         </span>

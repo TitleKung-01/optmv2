@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -15,11 +16,14 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { Edit2 } from 'lucide-react';
 import type { Schedule } from '@/lib/types';
+import EditScheduleModal from '@/components/EditScheduleModal';
 
 interface Props {
   schedules: Schedule[];
   onReorder: (newOrder: Schedule[]) => void;
+  onUpdateSchedule: (id: string, startTime: string, endTime: string, title?: string, taskId?: string | null) => Promise<void>;
 }
 
 function formatTime(iso: string) {
@@ -31,7 +35,24 @@ function formatDuration(start: string, end: string) {
   return mins >= 60 ? `${Math.floor(mins / 60)}ชม ${mins % 60 > 0 ? `${mins % 60}น.` : ''}`.trim() : `${mins} นาที`;
 }
 
-function SortableItem({ schedule }: { schedule: Schedule }) {
+function getLocalHHMM(isoString: string) {
+  const d = new Date(isoString);
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
+
+function updateISOTime(originalISO: string, timeString: string) {
+  const d = new Date(originalISO);
+  const [hours, minutes] = timeString.split(':').map(Number);
+  d.setHours(hours);
+  d.setMinutes(minutes);
+  d.setSeconds(0);
+  d.setMilliseconds(0);
+  return d.toISOString();
+}
+
+function SortableItem({ schedule, onEdit }: { schedule: Schedule; onEdit: (s: Schedule) => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: schedule.id });
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -114,32 +135,75 @@ function SortableItem({ schedule }: { schedule: Schedule }) {
             )}
           </div>
         </div>
-        {/* Drag handle */}
-        <button
-          {...attributes}
-          {...listeners}
-          style={{
-            cursor: 'grab',
-            color: 'var(--text-muted)',
-            background: 'none',
-            border: 'none',
-            fontSize: 18,
-            padding: '4px 8px',
-            borderRadius: 6,
-            display: 'flex',
-            alignItems: 'center',
-          }}
-          title="ลากเพื่อจัดเรียง"
-        >
-          ⠿
-        </button>
+
+        {/* Actions Container */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <button
+            type="button"
+            onClick={() => onEdit(schedule)}
+            style={{
+              cursor: 'pointer',
+              color: 'var(--text-muted)',
+              background: 'none',
+              border: 'none',
+              padding: '6px',
+              borderRadius: 6,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            className="hover:text-indigo-400 hover:bg-zinc-800/40 transition-colors"
+            title="แก้ไขกิจกรรม"
+          >
+            <Edit2 className="w-3.5 h-3.5" />
+          </button>
+
+          {/* Drag handle */}
+          <button
+            {...attributes}
+            {...listeners}
+            style={{
+              cursor: 'grab',
+              color: 'var(--text-muted)',
+              background: 'none',
+              border: 'none',
+              fontSize: 18,
+              padding: '4px 8px',
+              borderRadius: 6,
+              display: 'flex',
+              alignItems: 'center',
+            }}
+            title="ลากเพื่อจัดเรียง"
+          >
+            ⠿
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
-export default function ScheduleTimeline({ schedules, onReorder }: Props) {
+export default function ScheduleTimeline({ schedules, onReorder, onUpdateSchedule }: Props) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
+
+  const handleOpenEdit = (schedule: Schedule) => {
+    setEditingSchedule(schedule);
+  };
+
+  const handleSaveModal = async (startTime: string, endTime: string, title?: string) => {
+    if (!editingSchedule) return;
+    const isTask = editingSchedule.event_type === 'Task';
+    const updatedStart = updateISOTime(editingSchedule.start_time, startTime);
+    const updatedEnd = updateISOTime(editingSchedule.end_time, endTime);
+    await onUpdateSchedule(
+      editingSchedule.id,
+      updatedStart,
+      updatedEnd,
+      isTask ? title : undefined,
+      isTask ? editingSchedule.task_id : undefined
+    );
+  };
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -187,11 +251,19 @@ export default function ScheduleTimeline({ schedules, onReorder }: Props) {
         <SortableContext items={schedules.map(s => s.id)} strategy={verticalListSortingStrategy}>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {schedules.map(s => (
-              <SortableItem key={s.id} schedule={s} />
+              <SortableItem key={s.id} schedule={s} onEdit={handleOpenEdit} />
             ))}
           </div>
         </SortableContext>
       </DndContext>
+
+      {/* Editing Modal */}
+      <EditScheduleModal
+        isOpen={editingSchedule !== null}
+        schedule={editingSchedule}
+        onClose={() => setEditingSchedule(null)}
+        onSave={handleSaveModal}
+      />
     </div>
   );
 }

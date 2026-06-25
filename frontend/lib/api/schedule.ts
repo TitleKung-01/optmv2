@@ -59,24 +59,37 @@ export async function clearSchedulesForDate(date: string): Promise<void> {
   const dayEnd = new Date(date);
   dayEnd.setHours(23, 59, 59, 999);
 
+  console.log("clearSchedulesForDate called with date:", date);
+  console.log("Range ISO:", dayStart.toISOString(), "to", dayEnd.toISOString());
+
   const { data: daySchedules, error: fetchError } = await supabase
     .from('schedules')
     .select('task_id')
     .gte('start_time', dayStart.toISOString())
     .lte('start_time', dayEnd.toISOString());
 
-  if (fetchError) throw fetchError;
+  if (fetchError) {
+    console.error("fetchError in clearSchedulesForDate:", fetchError);
+    throw fetchError;
+  }
+
+  console.log("Fetched day schedules to clear:", daySchedules);
 
   const taskIds = (daySchedules ?? [])
     .map((s) => s.task_id)
     .filter((id): id is string => id !== null);
+
+  console.log("Task IDs to reset to Pending:", taskIds);
 
   if (taskIds.length > 0) {
     const { error: taskError } = await supabase
       .from('tasks')
       .update({ status: 'Pending' })
       .in('id', taskIds);
-    if (taskError) throw taskError;
+    if (taskError) {
+      console.error("taskError in clearSchedulesForDate:", taskError);
+      throw taskError;
+    }
   }
 
   const { error: deleteError } = await supabase
@@ -85,5 +98,26 @@ export async function clearSchedulesForDate(date: string): Promise<void> {
     .gte('start_time', dayStart.toISOString())
     .lte('start_time', dayEnd.toISOString());
 
-  if (deleteError) throw deleteError;
+  if (deleteError) {
+    console.error("deleteError in clearSchedulesForDate:", deleteError);
+    throw deleteError;
+  }
+
+  console.log("clearSchedulesForDate completed successfully");
 }
+
+export async function updateSchedule(id: string, updates: Partial<Schedule>): Promise<Schedule> {
+  const { data, error } = await supabase
+    .from('schedules')
+    .update(updates)
+    .eq('id', id)
+    .select('*, tasks(*)')
+    .single();
+
+  if (error) {
+    console.error("updateSchedule error:", error);
+    throw error;
+  }
+  return data as Schedule;
+}
+

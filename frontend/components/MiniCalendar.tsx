@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { toLocalDateString } from "@/lib/utils";
 import {
   ChevronLeft,
   ChevronRight,
@@ -36,7 +37,7 @@ export default function MiniCalendar({ selectedDate, onSelectDate }: Props) {
 
   // วันปัจจุบันจริงๆ
   const today = useMemo(() => new Date(), []);
-  const todayStr = useMemo(() => today.toISOString().slice(0, 10), [today]);
+  const todayStr = useMemo(() => toLocalDateString(today), [today]);
 
   // เดือนที่กำลังแสดงบนหน้าปฏิทิน
   const [currentMonth, setCurrentMonth] = useState(() => {
@@ -84,7 +85,7 @@ export default function MiniCalendar({ selectedDate, onSelectDate }: Props) {
         // นำ start_time มาแปลงเป็น YYYY-MM-DD แล้วเก็บลง Set เพื่อเช็คความเร็วสูง
         const datesSet = new Set<string>();
         data?.forEach((s: { start_time: string }) => {
-          const dateStr = s.start_time.slice(0, 10);
+          const dateStr = toLocalDateString(s.start_time);
           datesSet.add(dateStr);
         });
 
@@ -217,14 +218,14 @@ export default function MiniCalendar({ selectedDate, onSelectDate }: Props) {
               key={idx}
               type="button"
               onClick={() => onSelectDate(day.dateStr)}
-              className={`relative flex flex-col items-center justify-center h-9 w-9 rounded-md text-xs font-semibold cursor-pointer transition-all ${
+              className={`relative flex flex-col items-center justify-center h-9 w-9 rounded-xl text-xs font-bold cursor-pointer transition-all duration-200 ${
                 isSelected
-                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20 scale-105"
+                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/25 scale-105 border border-indigo-500/20"
                   : isToday
-                    ? "border border-indigo-500/30 text-indigo-400 bg-indigo-500/5"
+                    ? "border border-indigo-500/30 text-indigo-600 bg-indigo-50/50 font-black"
                     : day.isCurrentMonth
-                      ? "text-zinc-300 hover:bg-zinc-900"
-                      : "text-zinc-600 hover:bg-zinc-900/50"
+                      ? "text-zinc-200 hover:bg-white/45"
+                      : "text-zinc-500 hover:bg-white/25"
               }`}
             >
               <span>{day.dayNum}</span>

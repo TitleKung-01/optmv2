@@ -10,15 +10,17 @@ import Sidebar from "@/components/Sidebar";
 import ScheduleTimeline from "@/components/ScheduleTimeline";
 import EnergyGauge from "@/components/EnergyGauge";
 import MiniCalendar from "@/components/MiniCalendar";
+import ScheduleHeader from "@/components/ScheduleHeader";
+import DayStatusCard from "@/components/DayStatusCard";
+import EnergyIntervalsCard from "@/components/EnergyIntervalsCard";
+import SmartTipsCard from "@/components/SmartTipsCard";
+import ConfirmClearScheduleModal from "@/components/ConfirmClearScheduleModal";
 import {
   Clock,
-  Lightbulb,
   Zap,
   Smile,
-  Sparkles,
-  Trash2,
-  CalendarCheck,
 } from "lucide-react";
+import { updateTask } from "@/lib/api";
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -34,6 +36,7 @@ export default function SchedulePage() {
     triggerSchedule,
     reorderSchedules,
     clearDay,
+    updateScheduleTime,
   } = useSchedule();
   const { profile, fetchProfile } = useProfile();
   const energy = useEnergy(profile);
@@ -42,6 +45,7 @@ export default function SchedulePage() {
   const [generating, setGenerating] = useState(false);
   const [clearing, setClearing] = useState(false);
   const [message, setMessage] = useState("");
+  const [showConfirmClear, setShowConfirmClear] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) router.replace("/login");
@@ -70,13 +74,13 @@ export default function SchedulePage() {
     setGenerating(false);
   };
 
-  const handleClearDay = async () => {
+  const handleClearDay = () => {
     if (schedules.length === 0) return;
-    const ok = window.confirm(
-      `ล้างตารางของวันที่ ${date}?\nงานที่จัดแล้วจะกลับเป็นสถานะ "รอดำเนินการ"`,
-    );
-    if (!ok) return;
+    setShowConfirmClear(true);
+  };
 
+  const executeClearDay = async () => {
+    setShowConfirmClear(false);
     setClearing(true);
     setMessage("");
     try {
@@ -87,6 +91,18 @@ export default function SchedulePage() {
       setMessage("ล้างตารางไม่สำเร็จ");
     } finally {
       setClearing(false);
+    }
+  };
+
+  const handleUpdateSchedule = async (id: string, start: string, end: string, title?: string, taskId?: string | null) => {
+    try {
+      await updateScheduleTime(id, start, end);
+      if (title && taskId) {
+        await updateTask(taskId, { title });
+      }
+      await fetchSchedules(date);
+    } catch (error) {
+      console.error("Update schedule error:", error);
     }
   };
 
@@ -105,41 +121,18 @@ export default function SchedulePage() {
   ).length;
 
   return (
+    <>
     <div className="flex min-h-screen bg-zinc-950">
       <Sidebar />
       <main className="flex-1 min-w-0 p-8 overflow-y-auto max-w-7xl mx-auto sh-fade-up">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-6 border-b border-zinc-900">
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-zinc-100 flex items-center gap-2">
-              Schedule Dashboard
-            </h1>
-            <p className="text-sm text-zinc-500 font-medium mt-1">
-              จัดสรรและตรวจสอบวันที่มีภารกิจเพื่อผลลัพธ์ที่ดีที่สุด
-            </p>
-          </div>
-
-          <div className="flex gap-2.5 items-center flex-wrap">
-            <button
-              id="generate-schedule-btn"
-              className="sh-btn sh-btn-default px-4 py-2.5 text-xs font-semibold flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/10"
-              onClick={handleGenerate}
-              disabled={generating || clearing}
-            >
-              <Sparkles className="w-4 h-4 text-indigo-200" />
-              {generating ? "กำลังวิเคราะห์จัดตาราง..." : "จัดตารางงานอัจฉริยะ"}
-            </button>
-            <button
-              type="button"
-              className="sh-btn sh-btn-outline px-4 py-2.5 text-xs font-semibold flex items-center gap-1.5 text-zinc-400 border-zinc-800 hover:text-rose-400 hover:bg-rose-500/5 hover:border-rose-500/20"
-              onClick={handleClearDay}
-              disabled={clearing || generating || schedules.length === 0}
-            >
-              <Trash2 className="w-4 h-4" />
-              {clearing ? "กำลังล้างตาราง..." : "ล้างตาราง"}
-            </button>
-          </div>
-        </div>
+        <ScheduleHeader
+          generating={generating}
+          clearing={clearing}
+          onGenerate={handleGenerate}
+          onClear={handleClearDay}
+          hasSchedules={schedules.length > 0}
+        />
 
         {/* Message Banner */}
         {message && (
@@ -156,50 +149,11 @@ export default function SchedulePage() {
             <MiniCalendar selectedDate={date} onSelectDate={setDate} />
 
             {/* Quick Status card below calendar */}
-            <div className="sh-card p-5">
-              <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                <CalendarCheck className="w-3.5 h-3.5 text-indigo-400" />
-                สถานะวันที่เลือก
-              </div>
-              <div className="flex flex-col gap-2 text-xs font-medium">
-                <div className="flex justify-between py-1.5 border-b border-zinc-900/60 text-zinc-400">
-                  <span>วันที่กำหนด</span>
-                  <span className="text-zinc-200">
-                    {new Date(date).toLocaleDateString("th-TH", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </span>
-                </div>
-                <div className="flex justify-between py-1.5 border-b border-zinc-900/60 text-zinc-400">
-                  <span>งานรอทำวันนี้</span>
-                  <span
-                    className={
-                      todayTasksCount > 0
-                        ? "text-indigo-400 font-bold"
-                        : "text-zinc-500"
-                    }
-                  >
-                    {todayTasksCount} งาน
-                  </span>
-                </div>
-                <div className="flex justify-between py-1.5 text-zinc-400">
-                  <span>รวมชั่วโมงงาน</span>
-                  <span
-                    className={
-                      totalDuration > 0
-                        ? "text-emerald-400 font-bold"
-                        : "text-zinc-500"
-                    }
-                  >
-                    {totalDuration > 0
-                      ? `${Math.floor(totalDuration / 60)} ชม. ${totalDuration % 60} น.`
-                      : "0 นาที"}
-                  </span>
-                </div>
-              </div>
-            </div>
+            <DayStatusCard
+              date={date}
+              todayTasksCount={todayTasksCount}
+              totalDuration={totalDuration}
+            />
           </div>
 
           {/* Column 2: Timeline list (5 cols on wide screens) */}
@@ -224,6 +178,7 @@ export default function SchedulePage() {
               <ScheduleTimeline
                 schedules={schedules}
                 onReorder={reorderSchedules}
+                onUpdateSchedule={handleUpdateSchedule}
               />
             )}
           </div>
@@ -240,69 +195,22 @@ export default function SchedulePage() {
             </div>
 
             {/* Profile Energy summary */}
-            {profile?.peak_time_start && (
-              <div className="sh-card p-5 flex flex-col">
-                <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-4 flex items-center gap-1.5 pb-2 border-b border-zinc-900">
-                  <Clock className="w-3.5 h-3.5 text-zinc-500" />
-                  ช่วงพลังงานของคุณ
-                </div>
-
-                <div className="flex flex-col gap-3.5">
-                  {profile.peak_time_start && profile.peak_time_end && (
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                        🔥 Peak (สูงสุด)
-                      </span>
-                      <span className="font-semibold text-zinc-300 bg-zinc-900 px-2 py-1 rounded border border-zinc-800/60">
-                        {profile.peak_time_start.slice(0, 5)} –{" "}
-                        {profile.peak_time_end.slice(0, 5)}
-                      </span>
-                    </div>
-                  )}
-
-                  {profile.dip_time_start && profile.dip_time_end && (
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="text-rose-500 font-semibold flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                        😴 Dip (ตกต่ำสุด)
-                      </span>
-                      <span className="font-semibold text-zinc-300 bg-zinc-900 px-2 py-1 rounded border border-zinc-800/60">
-                        {profile.dip_time_start.slice(0, 5)} –{" "}
-                        {profile.dip_time_end.slice(0, 5)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+            <EnergyIntervalsCard profile={profile} />
 
             {/* AI Smart Tips */}
-            <div className="sh-card p-5 flex flex-col">
-              <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
-                Smart Tips
-              </div>
-              <ul className="text-xs text-zinc-500 font-medium leading-relaxed list-none flex flex-col gap-2">
-                <li className="flex gap-1.5 items-start">
-                  <span className="text-indigo-400 font-bold mt-0.5">•</span>
-                  <span>
-                    เลือกวันที่มีสัญลักษณ์จุด purple glow
-                    ใต้เลขปฏิทินเพื่อดูงานวันนั้นๆ
-                  </span>
-                </li>
-                <li className="flex gap-1.5 items-start">
-                  <span className="text-indigo-400 font-bold mt-0.5">•</span>
-                  <span>
-                    ลากเครื่องหมาย ⠿ ในตาราง Timeline
-                    เพื่อทำการปรับสลับเวลาตามที่ชอบ
-                  </span>
-                </li>
-              </ul>
-            </div>
+            <SmartTipsCard />
           </div>
         </div>
       </main>
     </div>
+
+    <ConfirmClearScheduleModal
+      isOpen={showConfirmClear}
+      date={date}
+      clearing={clearing}
+      onClose={() => setShowConfirmClear(false)}
+      onConfirm={executeClearDay}
+    />
+    </>
   );
 }
